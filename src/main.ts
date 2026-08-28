@@ -7,10 +7,12 @@ import { cachedLicenseIsValid, captureLicense, checkoutUrl, removeLicense, store
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
 const BUILD_ID = 'v1.0.0';
+captureLicense();
 let premium = cachedLicenseIsValid();
 let schedule = blankSchedule();
 let savedSchedules: Schedule[] = [];
 let demoMode = false;
+let licenseNotice = '';
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   '/': {
@@ -71,7 +73,7 @@ function footer(): string {
       <div class="footer-links">
         <a href="/privacy" data-route>Privacy</a>
         <a href="/terms" data-route>Terms</a>
-        <a href="https://param.sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external)</span></a>
+        <span>Built by Param Factory</span>
       </div>
       <p class="footer-note">${BUILD_ID} · Original generated ceramic artwork.</p>
     </footer>
@@ -103,8 +105,9 @@ function landingPage(): string {
           </ul>
         </div>
         <picture class="hero-art">
+          <source type="image/avif" srcset="/assets/hero-ceramic-768.avif 768w, /assets/hero-ceramic-1200.avif 1200w" sizes="(max-width: 760px) 100vw, 52vw" />
           <source type="image/webp" srcset="/assets/hero-ceramic-768.webp 768w, /assets/hero-ceramic-1200.webp 1200w" sizes="(max-width: 760px) 100vw, 52vw" />
-          <img src="/assets/hero-ceramic-1200.webp" width="1200" height="800" fetchpriority="high" decoding="async" alt="Two porcelain deadline markers joined by a cobalt ceramic bridge." />
+          <img src="/assets/hero-ceramic-1200.jpg" width="1200" height="800" fetchpriority="high" decoding="async" alt="Two porcelain deadline markers joined by a cobalt ceramic bridge." />
         </picture>
       </section>
 
@@ -165,7 +168,7 @@ function landingPage(): string {
         </div>
         <div class="price-block">
           <p class="price"><span>$</span>24</p>
-          <a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">through Sociobot checkout</span></a>
+          <a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">(opens Sociobot checkout)</span></a>
           <p>Sociobot and Dodo handle payment and refunds.</p>
         </div>
       </section>
@@ -178,7 +181,7 @@ function field(name: string, label: string, value: string, type = 'text', attrs 
 
 function scheduleForm(): string {
   const s = schedule;
-  const zoneOptions = Array.from(new Set([s.timeZone, ...timeZones])).map((zone) => `<option value="${escapeHtml(zone)}" ${zone === s.timeZone ? 'selected' : ''}>${escapeHtml(zone)}</option>`).join('');
+  const zoneOptions = Array.from(new Set([s.timeZone, ...timeZones])).map((zone) => `<option value="${escapeHtml(zone)}"></option>`).join('');
   const savedList = premium ? `
     <section class="saved-library" aria-labelledby="library-title">
       <div class="library-head"><div class="section-heading compact"><p class="eyebrow">Full library</p><h2 id="library-title">Saved schedules</h2></div><div><button class="button button-secondary" type="button" id="duplicate-schedule">Duplicate this schedule</button><button class="button button-primary" type="button" id="new-schedule">Create new schedule</button></div></div>
@@ -202,10 +205,11 @@ function scheduleForm(): string {
             ${field('clientName', 'Client name', s.clientName, 'text', 'required autocomplete="name"')}
             ${field('clientEmail', 'Client email', s.clientEmail, 'email', 'autocomplete="email"')}
             ${field('eventDate', 'Event or delivery date (optional)', s.eventDate, 'date')}
-            <div class="field"><label for="timeZone">Time zone for both deadlines</label><select id="timeZone" name="timeZone" required>${zoneOptions}</select></div>
+            <div class="field"><label for="timeZone">Time zone for both deadlines</label><input id="timeZone" name="timeZone" value="${escapeHtml(s.timeZone)}" list="time-zones" required aria-describedby="time-zone-help" /><datalist id="time-zones">${zoneOptions}</datalist></div>
             ${field('locale', 'Number locale', s.locale, 'text', 'required inputmode="text" aria-describedby="locale-help"')}
             ${field('currency', 'Currency code', s.currency, 'text', 'required maxlength="3" pattern="[A-Za-z]{3}"')}
           </div>
+          <p class="field-help" id="time-zone-help">Use an IANA zone such as Europe/London so daylight-saving changes stay precise.</p>
           <p class="field-help" id="locale-help">Example: en-US. You choose the locale; the app adds no local invoice rules.</p>
         </section>
 
@@ -272,7 +276,8 @@ function licensePanel(): string {
   return `
     <section class="license-panel" aria-labelledby="license-title">
       <div><p class="eyebrow">One current schedule is free</p><h2 id="license-title">Keep every quote for $24 once</h2><p>The license adds an unlimited local schedule library. Core calendar, instructions, reminders, and backups stay free.</p></div>
-      <div class="license-actions"><a class="button button-primary" href="${checkoutUrl()}">Buy the full library</a><button class="button button-secondary" id="show-license" type="button">Paste a license</button></div>
+      <div class="license-actions"><a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">(opens Sociobot checkout)</span></a><button class="button button-secondary" id="show-license" type="button">Paste a license</button></div>
+      ${licenseNotice ? `<p class="license-notice" role="status">${escapeHtml(licenseNotice)}</p>` : ''}
       <form id="license-form" class="license-form" hidden><div class="field"><label for="license-token">License token</label><input id="license-token" autocomplete="off" spellcheck="false" /></div><button class="button button-primary" type="submit">Verify license</button><p id="license-message" role="status"></p></form>
     </section>`;
 }
@@ -342,6 +347,13 @@ function validSchedule(showErrors = true): boolean {
   const form = document.querySelector<HTMLFormElement>('#schedule-form');
   if (!form) return false;
   schedule = readForm();
+  const zoneInput = document.querySelector<HTMLInputElement>('#timeZone');
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: schedule.timeZone }).format();
+    zoneInput?.setCustomValidity('');
+  } catch {
+    zoneInput?.setCustomValidity('Enter a valid IANA time zone, such as Europe/London.');
+  }
   let dateOrder = false;
   try {
     dateOrder = zonedTimeToUtc(schedule.balance.dueLocal, schedule.timeZone).getTime() > zonedTimeToUtc(schedule.deposit.dueLocal, schedule.timeZone).getTime();
@@ -527,9 +539,11 @@ function bindLicense(): void {
     try {
       premium = await verifyLicense(true);
       if (!premium) {
+        licenseNotice = 'License no longer active. The free schedule and exports still work.';
         if (message) message.textContent = 'This license is not active. Check the token or buy a new license.';
         return;
       }
+      licenseNotice = '';
       savedSchedules = await listSchedules();
       await renderRoute(false);
       toast('Full schedule library unlocked.');
@@ -609,7 +623,6 @@ function registerServiceWorker(): void {
   });
 }
 
-captureLicense();
 window.addEventListener('popstate', () => void renderRoute(true));
 window.addEventListener('online', updateOnlineState);
 window.addEventListener('offline', updateOnlineState);
@@ -618,6 +631,7 @@ registerServiceWorker();
 
 if (localStorage.getItem('sb_license:deposit-deadline-bridge')) {
   void verifyLicense().then(async (valid) => {
-    if (premium !== valid) { premium = valid; await renderRoute(false); }
+    if (!valid) licenseNotice = 'License no longer active. The free schedule and exports still work.';
+    if (!valid || premium !== valid) { premium = valid; await renderRoute(false); }
   }).catch(() => { /* Keep the cached verdict while offline. */ });
 }
