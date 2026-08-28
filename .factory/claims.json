@@ -11,7 +11,14 @@
     "claim": "Your schedules stay in this browser.",
     "where": "landing facts, privacy page, README",
     "test": "npm test -- --grep @claim:local-schedules",
-    "sandbox": "fresh demo context; intercept the full flow and assert no cross-origin network request contains schedule data"
+    "sandbox": "fresh /demo context; choose Start for real, save a schedule containing unique quote/client/payment fields, intercept the full flow, assert no cross-origin URL/body/header contains those fields, and assert the record exists in IndexedDB"
+  },
+  {
+    "id": "demo-ready",
+    "claim": "Opens a complete two-payment schedule.",
+    "where": "landing CTA note",
+    "test": "npm test -- --grep @claim:demo-ready",
+    "sandbox": "fresh landing page; click Try it with sample data once and assert the demo banner, HT-084, client, amounts, dates, time zone, payment wording, and export actions are ready"
   },
   {
     "id": "calendar-two-events",
@@ -46,7 +53,7 @@
     "claim": "The app never sends a reminder without user confirmation.",
     "where": "landing boundaries, reminder dialog, README",
     "test": "npm test -- --grep @claim:confirm-reminder",
-    "sandbox": "fresh /demo sample; request a reminder, assert the editable review dialog opens, cancel it, and assert no mailto navigation occurred"
+    "sandbox": "fresh /demo sample; exercise deposit and final-balance reminders while recording requests and mailto activation; assert none happens before confirmation or after cancel, and the explicit action activates only the editable expected mailto URL"
   },
   {
     "id": "private-runtime",
@@ -74,7 +81,7 @@
     "claim": "Demo sample changes are not saved.",
     "where": "demo banner, README",
     "test": "npm test -- --grep @claim:demo-isolation",
-    "sandbox": "fresh /demo context; edit the sample, reload, and assert the original bundled value returns"
+    "sandbox": "fresh workspace; save a real schedule, snapshot IndexedDB and localStorage, edit and reset the demo, then assert the real snapshots are byte-for-byte unchanged and no sample record is persisted"
   },
   {
     "id": "json-backup",
@@ -85,9 +92,9 @@
   },
   {
     "id": "one-free-schedule",
-    "claim": "One schedule is free; the unlimited local library costs $24 once.",
+    "claim": "One schedule is free; $24 unlocks a library for multiple schedules in this browser.",
     "where": "landing facts, pricing, workspace license panel, README",
     "test": "npm test -- --grep @claim:one-free-schedule",
-    "sandbox": "fresh context; assert price and checkout URL, verify a mocked valid license, and prove the paid library can retain two records while free mode retains one"
+    "sandbox": "fresh context; assert price and checkout URL, verify a mocked valid license, and prove the paid library saves and reopens three records while free mode retains one"
   }
 ]

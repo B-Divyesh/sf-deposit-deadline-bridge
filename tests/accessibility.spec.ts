@@ -19,6 +19,28 @@ test('mobile workspace has no horizontal overflow and remains usable', async ({ 
   await expect(page.getByRole('button', { name: 'Download calendar' })).toBeVisible();
 });
 
+test('mobile landing shows all three plain facts before scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  for (const text of ['Works offline after the first visit.', 'Your schedules stay in this browser.', 'One schedule is free. The full library costs $24 once.']) {
+    const box = await page.getByText(text, { exact: true }).boundingBox();
+    expect(box?.y).toBeGreaterThanOrEqual(0);
+    expect((box?.y ?? 900) + (box?.height ?? 0)).toBeLessThanOrEqual(844);
+  }
+});
+
+test('demo warning and controls remain visible after mobile export scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/demo');
+  await page.getByRole('button', { name: 'Download calendar' }).scrollIntoViewIfNeeded();
+  const banner = page.getByLabel('Demo mode');
+  await expect(banner).toBeVisible();
+  const box = await banner.boundingBox();
+  expect(box?.y).toBeGreaterThanOrEqual(0);
+  await expect(banner.getByRole('button', { name: 'Reset demo' })).toBeVisible();
+  await expect(banner.getByRole('link', { name: 'Start for real' })).toBeVisible();
+});
+
 test('mobile navigation and footer links meet the 44 pixel target baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');

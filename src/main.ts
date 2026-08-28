@@ -6,7 +6,7 @@ import { cachedLicenseIsValid, captureLicense, checkoutUrl, removeLicense, store
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-const BUILD_ID = 'v1.0.2';
+const BUILD_ID = 'v1.0.3';
 captureLicense();
 let premium = cachedLicenseIsValid();
 let schedule = blankSchedule();
@@ -17,7 +17,7 @@ let licenseNotice = '';
 const pageMeta: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Deposit Deadline Bridge — preserve payment dates',
-    description: 'Keep deposit and final payment dates intact when a quote becomes an invoice.',
+    description: 'Keep deposit and final-balance dates intact when a quote becomes an invoice.',
   },
   '/workspace': {
     title: 'Payment schedule — Deposit Deadline Bridge',
@@ -91,18 +91,18 @@ function landingPage(): string {
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Deposit Deadline Bridge</p>
-          <h1 tabindex="-1">Keep deposit and balance dates intact</h1>
+          <h1 tabindex="-1">Keep deposit and final-balance dates</h1>
           <p class="hero-lede">For event and project businesses whose agreed payment dates disappear when a quote becomes an invoice.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="/demo" data-route>Try it with sample data</a>
             <span>Opens a complete two-payment schedule.</span>
           </div>
-          <a class="text-action" href="/workspace" data-route>Create a blank schedule</a>
           <ul class="plain-facts" aria-label="Product facts">
             <li>Works offline after the first visit.</li>
             <li>Your schedules stay in this browser.</li>
             <li>One schedule is free. The full library costs $24 once.</li>
           </ul>
+          <a class="text-action" href="/workspace" data-route>Create a blank schedule</a>
         </div>
         <picture class="hero-art">
           <source type="image/avif" srcset="/assets/hero-ceramic-768.avif 768w, /assets/hero-ceramic-1200.avif 1200w" sizes="(max-width: 760px) 100vw, 52vw" />
@@ -115,7 +115,7 @@ function landingPage(): string {
         <div class="section-heading">
           <p class="eyebrow">The attachment your invoice lacks</p>
           <h2 id="preview-title">Two dates stay separate</h2>
-          <p>Attach the exported instructions to any invoice. Add both deadlines to your calendar without typing them again.</p>
+          <p>Download two plain payment instructions to attach to an invoice. Add both deadlines to your calendar without typing them again.</p>
         </div>
         <div class="preview-sheet" aria-label="Sample payment schedule preview">
           <div class="preview-head">
@@ -145,7 +145,7 @@ function landingPage(): string {
         <div class="section-heading"><p class="eyebrow">How it works</p><h2 id="steps-title">Move both dates without retyping</h2></div>
         <ol>
           <li><span>01</span><div><h3>Record the agreement</h3><p>Add the deposit, final balance, local times, and exact time zone.</p></div></li>
-          <li><span>02</span><div><h3>Export the bridge</h3><p>Download one calendar file and two plain payment instructions.</p></div></li>
+          <li><span>02</span><div><h3>Export both payment deadlines</h3><p>Download one calendar file and two plain payment instructions.</p></div></li>
           <li><span>03</span><div><h3>Review each reminder</h3><p>Check the email draft before your own email app opens it.</p></div></li>
         </ol>
       </section>
@@ -162,13 +162,13 @@ function landingPage(): string {
       <section class="pricing" aria-labelledby="pricing-title">
         <div>
           <p class="eyebrow">One-time license</p>
-          <h2 id="pricing-title">Keep every accepted quote</h2>
-          <p>The free version keeps one current schedule. Pay $24 once to save and reopen an unlimited schedule library.</p>
+          <h2 id="pricing-title">Keep every payment schedule</h2>
+          <p>The free version keeps one current schedule. Pay $24 once to save and reopen multiple schedules in this browser.</p>
         </div>
         <div class="price-block">
           <p class="price"><span>$</span>24</p>
           <a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">(opens Sociobot checkout)</span></a>
-          <p>Sociobot and Dodo handle payment and refunds.</p>
+          <p><a href="/terms" data-route>Read payment and refund terms</a></p>
         </div>
       </section>
     </main>`);
@@ -221,7 +221,7 @@ function scheduleForm(): string {
             ${field('locale', 'Number locale', s.locale, 'text', 'required inputmode="text" aria-describedby="locale-help"')}
             ${field('currency', 'Currency code', s.currency, 'text', 'required maxlength="3" pattern="[A-Za-z]{3}"')}
           </div>
-          <p class="field-help" id="time-zone-help">Use an IANA zone such as Europe/London. The app rejects missing clock times and lets you choose either repeated time.</p>
+          <p class="field-help" id="time-zone-help">Use a named time zone such as Europe/London. The app catches missing clock times and lets you choose either repeated time.</p>
           <p class="field-help" id="locale-help">Example: en-US. You choose the locale; the app adds no local invoice rules.</p>
         </section>
 
@@ -286,10 +286,10 @@ function scheduleForm(): string {
 
 function licensePanel(): string {
   if (premium) return `
-    <section class="license-panel" aria-labelledby="license-title"><div><p class="eyebrow">Full library active</p><h2 id="license-title">Your license is on this device</h2><p>You can save and reopen as many schedules as you need.</p></div><button class="button button-quiet" id="remove-license" type="button">Remove license</button></section>`;
+    <section class="license-panel" aria-labelledby="license-title"><div><p class="eyebrow">Full library active</p><h2 id="license-title">Your license is on this device</h2><p>You can save and reopen multiple schedules in this browser.</p></div><button class="button button-quiet" id="remove-license" type="button">Remove license</button></section>`;
   return `
     <section class="license-panel" aria-labelledby="license-title">
-      <div><p class="eyebrow">One current schedule is free</p><h2 id="license-title">Keep every quote for $24 once</h2><p>The license adds an unlimited local schedule library. Core calendar, instructions, reminders, and backups stay free.</p></div>
+      <div><p class="eyebrow">One current schedule is free</p><h2 id="license-title">Keep every schedule for $24 once</h2><p>The license adds a library for multiple schedules in this browser. Core calendar, instructions, reminders, and backups stay free.</p></div>
       <div class="license-actions"><a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">(opens Sociobot checkout)</span></a><button class="button button-secondary" id="show-license" type="button">Paste a license</button></div>
       ${licenseNotice ? `<p class="license-notice" role="status">${escapeHtml(licenseNotice)}</p>` : ''}
       <form id="license-form" class="license-form" hidden><div class="field"><label for="license-token">License token</label><input id="license-token" autocomplete="off" spellcheck="false" /></div><button class="button button-primary" type="submit">Verify license</button><p id="license-message" role="status"></p></form>
@@ -316,7 +316,7 @@ function legalPage(kind: 'privacy' | 'terms'): string {
     <h1 tabindex="-1">${privacy ? 'Your schedules stay with you' : 'Terms for using the bridge'}</h1>
     <p class="legal-lede">${privacy ? 'This page explains what is stored and when a network request happens.' : 'These terms keep a small local utility clear and fair.'}</p>
     ${privacy ? `
-      <section><h2>Schedule data</h2><p>Real schedules are stored in IndexedDB in your browser. Demo changes stay in memory and disappear when you leave or reset the demo.</p><p>The app does not send quote, client, payment, or date details to a server. JSON backup files are created only when you request them.</p></section>
+      <section><h2>Schedule data</h2><p>Real schedules are stored in this browser. Demo changes stay in memory and disappear when you leave or reset the demo.</p><p>The app does not send quote, client, payment, or date details to a server. JSON backup files are created only when you request them.</p></section>
       <section><h2>License data</h2><p>If you buy or restore a license, the license token and its latest verdict are stored in localStorage. The app sends only that token to the Sociobot license service.</p><p>Sociobot and Dodo process checkout details under their own policies.</p></section>
       <section><h2>Network and deletion</h2><p>App files load from this site and are cached for offline use. There are no analytics, advertising scripts, or third-party fonts.</p><p>Clear this site’s browser data to remove schedules and the license token. You can also remove the license inside the workspace.</p></section>` : `
       <section><h2>Use of the tool</h2><p>You remain responsible for checking every amount, date, time zone, reminder, and payment instruction before sharing it.</p><p>The app does not provide accounting, tax, legal, late-fee, or debt-collection advice.</p></section>
@@ -411,7 +411,7 @@ function validSchedule(showErrors = true): boolean {
     new Intl.DateTimeFormat('en', { timeZone: schedule.timeZone }).format();
     zoneInput?.setCustomValidity('');
   } catch {
-    zoneInput?.setCustomValidity('Enter a valid IANA time zone, such as Europe/London.');
+    zoneInput?.setCustomValidity('Enter a valid named time zone, such as Europe/London.');
   }
   const allTimesExist = updateTimeDisambiguation();
   let dateOrder = false;
@@ -595,10 +595,19 @@ function openReminder(kind: 'deposit' | 'balance'): void {
   openButton?.addEventListener('click', (event) => {
     event.preventDefault();
     const params = new URLSearchParams({ subject: subject.value, body: body.value });
-    window.location.href = `mailto:${encodeURIComponent(schedule.clientEmail)}?${params.toString()}`;
+    openEmailApp(`mailto:${encodeURIComponent(schedule.clientEmail)}?${params.toString()}`);
     dialog.close();
   }, { once: true });
   dialog.showModal();
+}
+
+function openEmailApp(target: string): void {
+  const link = document.createElement('a');
+  link.href = target;
+  link.hidden = true;
+  document.body.append(link);
+  link.click();
+  link.remove();
 }
 
 function bindLicense(): void {
@@ -671,6 +680,10 @@ async function renderRoute(focusHeading = true): Promise<void> {
   document.title = meta.title;
   document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute('content', meta.description);
   document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', `https://deposit-deadline-bridge.sociobot.in${path === '/' ? '/' : path}`);
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute('content', meta.title);
+  document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.setAttribute('content', meta.description);
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute('content', meta.title);
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]')?.setAttribute('content', meta.description);
   if (path === '/') app.innerHTML = landingPage();
   else if (path === '/workspace' || path === '/demo') app.innerHTML = workspacePage();
   else if (path === '/privacy' || path === '/terms') app.innerHTML = legalPage(path.slice(1) as 'privacy' | 'terms');

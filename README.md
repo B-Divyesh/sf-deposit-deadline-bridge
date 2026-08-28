@@ -1,8 +1,10 @@
 # Deposit Deadline Bridge
 
-Keep deposit and final payment dates intact when a quote becomes an invoice.
+Keep deposit and final-balance dates intact when a quote becomes an invoice.
 
-Deposit Deadline Bridge is for event, catering, and project businesses. It records two negotiated deadlines with an IANA time zone, rejects nonexistent daylight-saving times, lets you choose either repeated time, then creates one calendar file and two plain payment instructions. Every reminder opens as an editable draft before the user chooses to open their email app.
+Deposit Deadline Bridge is for event, catering, and project businesses.
+
+Record the deposit and final balance in a named time zone. The app catches missing clock times and lets you choose when a clock time repeats. Then export one calendar file and two payment instructions. Every reminder opens as an editable draft before your email app opens.
 
 Live site: <https://deposit-deadline-bridge.sociobot.in>
 
@@ -14,7 +16,7 @@ The sample is quote HT-084 for the Highland Glasshouse Supper. Demo changes are 
 
 ## What v1 does
 
-- Stores real schedules in browser IndexedDB.
+- Stores real schedules in this browser.
 - Keeps the deposit and final balance as separate dated payments.
 - Downloads one `.ics` calendar containing both deadlines and both reminder alarms.
 - Downloads or copies two payment instructions for an invoice or accounting system.
@@ -23,7 +25,7 @@ The sample is quote HT-084 for the Highland Glasshouse Supper. Demo changes are 
 - Works offline after the first visit.
 - Keeps one current schedule for free.
 
-The $24 one-time license adds an unlimited local schedule library. Checkout and license verification use the Sociobot billing API.
+The $24 one-time license lets you save and reopen multiple schedules in this browser. Sociobot handles checkout and license checks.
 
 ## Privacy and scope
 
@@ -53,13 +55,13 @@ npm run build
 
 `npm test` builds and serves the production app, then runs the claim and accessibility checks in Chromium. The exact production build command is `npm run build`. Static output lands in `dist/`, with `dist/index.html` at its root.
 
-After deployment, run `npm run test:live` to verify the public route, CSP-safe 404, billing catalog, and hosted checkout.
+After deployment, run `npm run test:live` to check routing, the product’s payment listing, and checkout.
 
 Claim definitions and their sandbox steps are in [`.factory/claims.json`](.factory/claims.json). The demo contract is in [`.factory/demo.md`](.factory/demo.md).
 
 ## Deploy
 
-Deploy the contents of `dist/` as a static site. `staticwebapp.config.json` supplies the SPA fallback, security headers, and cache rules for Azure Static Web Apps. The factory owns DNS and billing registration.
+Deploy the contents of `dist/` to Azure Static Web Apps. The included configuration routes app pages correctly and applies browser security and caching settings. The factory owns DNS and billing registration.
 
 ## License
 

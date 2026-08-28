@@ -3,6 +3,20 @@ import { readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+async function savedSchedules(page: import('@playwright/test').Page): Promise<unknown[]> {
+  return page.evaluate(async () => new Promise<unknown[]>((resolve, reject) => {
+    const request = indexedDB.open('deposit-deadline-bridge');
+    request.onsuccess = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('schedules')) { db.close(); resolve([]); return; }
+      const getAll = db.transaction('schedules').objectStore('schedules').getAll();
+      getAll.onsuccess = () => { db.close(); resolve(getAll.result); };
+      getAll.onerror = () => { db.close(); reject(getAll.error); };
+    };
+    request.onerror = () => reject(request.error);
+  }));
+}
+
 test('@claim:offline-reload works offline after the first visit', async ({ page, context }) => {
   await page.goto('/demo');
   await expect(page.locator('#projectName')).toHaveValue('Highland Glasshouse Supper');
@@ -25,17 +39,47 @@ test('@claim:offline-reload works offline after the first visit', async ({ page,
   await expect(page.getByText('You are offline. Editing and exports still work.')).toBeVisible();
 });
 
-test('@claim:local-schedules keeps schedule data on the same origin', async ({ page }) => {
-  const externalRequests: string[] = [];
+test('@claim:local-schedules saves real schedules locally without exposing their fields', async ({ page }) => {
+  const externalRequests: { url: string; body: string; headers: Record<string, string> }[] = [];
   page.on('request', (request) => {
     const url = new URL(request.url());
-    if (!['127.0.0.1', 'localhost'].includes(url.hostname)) externalRequests.push(request.url());
+    if (!['127.0.0.1', 'localhost'].includes(url.hostname)) externalRequests.push({ url: request.url(), body: request.postData() ?? '', headers: request.headers() });
   });
   await page.goto('/demo');
+  await page.getByRole('link', { name: 'Start for real' }).click();
+  await expect(page).toHaveURL(/\/workspace$/);
+  await page.locator('#quoteNumber').fill('PRIVATE-17');
   await page.locator('#projectName').fill('Private winter dinner');
-  await page.getByRole('button', { name: 'Check demo schedule' }).click();
-  await page.getByRole('button', { name: 'Export JSON backup' }).click();
+  await page.locator('#clientName').fill('Mira Santos');
+  await page.locator('#clientEmail').fill('mira@example.test');
+  await page.locator('#depositAmount').fill('1200');
+  await page.locator('#depositDue').fill('2026-09-10T12:00');
+  await page.locator('#balanceAmount').fill('2800');
+  await page.locator('#balanceDue').fill('2026-10-10T12:00');
+  await page.locator('#paymentMethod').fill('Private bank instructions');
+  await page.locator('#paymentReference').fill('PRIVATE-17 only');
+  await page.getByRole('button', { name: 'Save schedule' }).click();
+  await expect(page.locator('#save-state')).toHaveText('Saved in this browser.');
   expect(externalRequests).toEqual([]);
+  const stored = await savedSchedules(page);
+  expect(stored).toHaveLength(1);
+  expect(stored[0]).toMatchObject({ quoteNumber: 'PRIVATE-17', projectName: 'Private winter dinner', clientEmail: 'mira@example.test' });
+});
+
+test('@claim:demo-ready opens a complete sample schedule in one click', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page.getByLabel('Demo mode')).toBeVisible();
+  await expect(page.locator('#quoteNumber')).toHaveValue('HT-084');
+  await expect(page.locator('#projectName')).toHaveValue('Highland Glasshouse Supper');
+  await expect(page.locator('#clientName')).toHaveValue('Maya Chen');
+  await expect(page.locator('#depositAmount')).toHaveValue('2400');
+  await expect(page.locator('#balanceAmount')).toHaveValue('5600');
+  await expect(page.locator('#timeZone')).toHaveValue('America/New_York');
+  await expect(page.locator('#paymentMethod')).toHaveValue(/Bank transfer/);
+  await expect(page.getByRole('button', { name: 'Download calendar' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Download payment instructions' })).toBeVisible();
 });
 
 test('@claim:calendar-two-events exports both deadlines and reminders', async ({ page }) => {
@@ -105,9 +149,22 @@ test('@claim:dst-precision rejects missing times and exports the selected repeat
   expect(await readFile(path, 'utf8')).toContain('DTSTART:20261101T063000Z');
 });
 
-test('@claim:confirm-reminder requires review before opening email', async ({ page }) => {
+test('@claim:confirm-reminder never opens email before explicit confirmation for either deadline', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target instanceof HTMLAnchorElement && target.protocol === 'mailto:') {
+        event.preventDefault();
+        document.documentElement.dataset.mailto = target.href;
+      }
+    }, true);
+  });
+  const externalRequests: string[] = [];
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (!['127.0.0.1', 'localhost'].includes(url.hostname)) externalRequests.push(request.url());
+  });
   await page.goto('/demo');
-  const before = page.url();
   await page.getByRole('button', { name: 'Review deposit email' }).click();
   const dialog = page.getByRole('dialog', { name: 'Review reminder email' });
   await expect(dialog).toBeVisible();
@@ -115,7 +172,16 @@ test('@claim:confirm-reminder requires review before opening email', async ({ pa
   await expect(dialog.getByLabel('Message')).toHaveValue(/2,400/);
   await dialog.getByRole('button', { name: 'Keep editing' }).click();
   await expect(dialog).not.toBeVisible();
-  expect(page.url()).toBe(before);
+  expect(await page.locator('html').getAttribute('data-mailto')).toBeNull();
+  expect(externalRequests).toEqual([]);
+
+  await page.getByRole('button', { name: 'Review balance email' }).click();
+  await expect(dialog).toBeVisible();
+  expect(await page.locator('html').getAttribute('data-mailto')).toBeNull();
+  await dialog.getByRole('button', { name: 'Open email app' }).click();
+  await expect.poll(() => page.locator('html').getAttribute('data-mailto')).toContain('mailto:maya%40example.com?');
+  expect(await page.locator('html').getAttribute('data-mailto')).toContain('Final+balance+due');
+  expect(externalRequests).toEqual([]);
 });
 
 test('@claim:private-runtime makes no third-party request or font load during the demo flow', async ({ page }) => {
@@ -161,12 +227,30 @@ test('@claim:no-added-rules keeps payment wording user-configured without adding
   expect(text.toLowerCase()).not.toContain('late fee');
 });
 
-test('@claim:demo-isolation resets sample changes after reload', async ({ page }) => {
+test('@claim:demo-isolation leaves real storage byte-for-byte unchanged', async ({ page }) => {
+  await page.goto('/workspace');
+  await page.locator('#quoteNumber').fill('REAL-17');
+  await page.locator('#projectName').fill('Real dinner');
+  await page.locator('#clientName').fill('Ravi Shah');
+  await page.locator('#depositAmount').fill('1100');
+  await page.locator('#depositDue').fill('2026-09-01T12:00');
+  await page.locator('#balanceAmount').fill('2200');
+  await page.locator('#balanceDue').fill('2026-09-21T12:00');
+  await page.locator('#paymentMethod').fill('Bank transfer');
+  await page.locator('#paymentReference').fill('REAL-17');
+  await page.getByRole('button', { name: 'Save schedule' }).click();
+  const beforeSchedules = await savedSchedules(page);
+  const beforeLocalStorage = await page.evaluate(() => JSON.stringify({ ...localStorage }));
   await page.goto('/demo');
   await page.locator('#projectName').fill('Changed demo name');
   await page.getByRole('button', { name: 'Check demo schedule' }).click();
-  await page.reload();
+  await page.getByRole('button', { name: 'Reset demo' }).click();
   await expect(page.locator('#projectName')).toHaveValue('Highland Glasshouse Supper');
+  expect(await savedSchedules(page)).toEqual(beforeSchedules);
+  expect(await page.evaluate(() => JSON.stringify({ ...localStorage }))).toBe(beforeLocalStorage);
+  await page.getByRole('link', { name: 'Start for real' }).click();
+  await expect(page.locator('#quoteNumber')).toHaveValue('REAL-17');
+  expect(await savedSchedules(page)).toEqual(beforeSchedules);
 });
 
 test('@claim:json-backup exports and imports a schedule backup', async ({ page }) => {
@@ -187,7 +271,7 @@ test('@claim:json-backup exports and imports a schedule backup', async ({ page }
   await expect(page.locator('#projectName')).toHaveValue('Imported winter supper');
 });
 
-test('@claim:one-free-schedule keeps one free record and shows the paid library terms', async ({ page }) => {
+test('@claim:one-free-schedule keeps one free record and unlocks multiple saved schedules for $24', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('One schedule is free. The full library costs $24 once.')).toBeVisible();
   await expect(page.getByRole('link', { name: /Buy the full library/ }).first()).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/checkout');
@@ -236,5 +320,8 @@ test('@claim:one-free-schedule keeps one free record and shows the paid library 
   await page.getByRole('button', { name: 'Duplicate this schedule' }).click();
   await page.locator('#quoteNumber').fill('Q-3');
   await page.getByRole('button', { name: 'Save schedule' }).click();
-  await expect(page.locator('.saved-library .saved-item')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Duplicate this schedule' }).click();
+  await page.locator('#quoteNumber').fill('Q-4');
+  await page.getByRole('button', { name: 'Save schedule' }).click();
+  await expect(page.locator('.saved-library .saved-item')).toHaveCount(3);
 });

@@ -1,7 +1,7 @@
 {
   "name": "Deposit Deadline Bridge",
   "short_name": "Deadline Bridge",
-  "description": "Keep deposit and final payment dates intact.",
+  "description": "Keep deposit and final-balance dates intact.",
   "id": "/",
   "start_url": "/workspace?v=1.0.2",
   "scope": "/",

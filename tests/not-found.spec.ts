@@ -25,6 +25,13 @@ test('designed 404 loads its same-origin stylesheet under the production CSP', a
   expect((await stylesheetResponse).status()).toBe(200);
   await expect(page.getByRole('heading', { level: 1, name: 'This bridge ends here' })).toBeVisible();
   await expect(page.locator('link[rel="stylesheet"]')).toHaveAttribute('href', '/404.css');
+  await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeAttached();
+  await expect(page.getByRole('banner').getByRole('link', { name: 'Deposit Deadline Bridge home' })).toBeVisible();
+  await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Privacy' })).toBeVisible();
+  await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Terms' })).toBeVisible();
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', 'The requested Deposit Deadline Bridge page was not found.');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://deposit-deadline-bridge.sociobot.in/404');
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/favicon.svg');
   expect(await page.locator('main').evaluate((element) => element.getBoundingClientRect().height >= window.innerHeight)).toBe(true);
   expect(errors.filter((message) => !message.includes('server responded with a status of 404'))).toEqual([]);
 });

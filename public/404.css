@@ -9,8 +9,15 @@
 body {
   min-width: 320px;
   margin: 0;
+  min-height: 100vh;
 }
 
+.skip-link { position: fixed; z-index: 100; left: 16px; top: 8px; padding: 12px 16px; background: #172a30; color: #fff; transform: translateY(-150%); }
+.skip-link:focus { transform: translateY(0); }
+.site-header { min-height: 80px; width: min(1400px, calc(100% - 48px)); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #cfe1e1; }
+.wordmark { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; gap: 10px; color: #172a30; text-decoration: none; font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem; }
+.wordmark svg { width: 40px; height: 24px; fill: #fffdfa; stroke: #165b70; stroke-width: 2.5; }
+nav { display: flex; gap: 28px; align-items: center; } nav a, .site-footer a { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; color: #172a30; text-underline-offset: .2em; }
 main {
   width: min(720px, calc(100% - 48px));
   min-height: 100vh;
@@ -46,7 +53,7 @@ p {
   line-height: 1.55;
 }
 
-a {
+.return-home {
   min-width: 44px;
   min-height: 48px;
   display: inline-flex;
@@ -61,7 +68,12 @@ a {
   text-decoration: none;
 }
 
-a:focus-visible {
+:focus-visible {
   outline: 3px solid #be6b23;
   outline-offset: 3px;
 }
+
+.broken-bridge { height: 90px; display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 20px; }
+.broken-bridge span { width: 80px; height: 50px; border-radius: 50%; background: #fffdfa; border: 1px solid #cfe1e1; box-shadow: 0 13px 30px rgba(37,67,73,.08); }.broken-bridge i { width: 56px; height: 5px; background: #165b70; transform: rotate(-12deg) translateY(9px); }
+.site-footer { padding: 36px max(24px, calc((100% - 1400px) / 2)); background: #eef3f1; border-top: 1px solid #cfe1e1; display: grid; grid-template-columns: 1fr auto; gap: 12px 32px; align-items: center; }.site-footer p { margin: 0; }.site-footer > div { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }.footer-note { color: #53666a; font-size: .78rem; grid-column: 1 / -1; }
+@media (max-width: 600px) { .site-header { width: calc(100% - 32px); min-height: 68px; }.wordmark span { display: none; } nav { gap: 14px; font-size: .9rem; } main { width: calc(100% - 32px); min-height: 100vh; } .site-footer { grid-template-columns: 1fr; } }
