@@ -2,7 +2,7 @@
 
 Repair commit: `944c63955666ca6c90ccaa05d75e11c93dcb81fe`.
 
-Local screenshots and URL-verifier report: `.factory/evidence/polish-2/query-demo/`. The direct sample URL used for verification is `http://127.0.0.1:4173/?demo=1`; deployed evidence is added to the handoff after release verification.
+Screenshots and URL-verifier reports: `.factory/evidence/polish-2/query-demo/` and `.factory/evidence/polish-2/live-query-demo/`. The direct sample URL is `https://deposit-deadline-bridge.sociobot.in/?demo=1`.
 
 | Finding | Change made | Evidence |
 | --- | --- | --- |
@@ -36,3 +36,5 @@ Local screenshots and URL-verifier report: `.factory/evidence/polish-2/query-dem
 - Fresh clone: `npm run test:unit` (3 passed), `npm test` (30 passed), `npm run build`, and `npm audit --audit-level=moderate` (0 vulnerabilities).
 - Local direct demo: `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/?demo=1 .factory/evidence/polish-2/query-demo` passed with title `Demo — Deposit Deadline Bridge`, `lang=en`, one h1/main, zero missing image alts, zero unlabeled buttons, and no console errors.
 - Accessibility is run in the browser suite with `@axe-core/playwright` on `/`, `/demo`, `/privacy`, `/terms`, and a missing route; serious/critical violations are required to be empty. The standalone axe CLI could not launch against the supplied Playwright Chromium because its bundled ChromeDriver supports Chrome 152 while the supplied browser is 145; the project’s pinned Playwright axe integration is the successful equivalent.
+- Static deployment: Azure Static Web Apps deployment `eeead0eb-54d7-44b3-9bb7-a20cb62fb281` completed successfully. `npm run test:live` passed afterward.
+- Cold live browser check: `/?demo=1` had title `Demo — Deposit Deadline Bridge`, quote `HT-084`, the sticky banner at the export controls, and Reset demo restored `Highland Glasshouse Supper`. `/`, `/privacy`, `/terms`, and `/regression-missing-page` had one h1/main plus the common header/footer; the missing route returned HTTP 404. The only console event was the expected browser report for that deliberately requested 404.

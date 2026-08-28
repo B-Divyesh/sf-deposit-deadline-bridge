@@ -2,7 +2,7 @@
 
 ## Result
 
-All cumulative findings in `review-1.md` and `review-2.md` are repaired in `944c63955666ca6c90ccaa05d75e11c93dcb81fe`. The product retains its glacial-ceramic visual system and PWA/local-first deployment class. The first-screen demo action is now the isolated `?demo=1` path, with the sticky banner, Reset demo, and Start for real controls.
+All cumulative findings in `review-1.md` and `review-2.md` are repaired in `944c63955666ca6c90ccaa05d75e11c93dcb81fe`. The product retains its glacial-ceramic visual system and PWA/local-first deployment class. The first-screen demo action is now the isolated `?demo=1` path, with the sticky banner, Reset demo, and Start for real controls. This handoff and the finding map are committed separately after the repair.
 
 ## How to run and verify
 
@@ -24,7 +24,9 @@ npm run build
 - Production output: app JavaScript is 12.30 kB gzip and CSS is 4.90 kB gzip.
 - Local `verify-url.sh` evidence is at `.factory/evidence/polish-2/query-demo/`: direct `?demo=1` has the Demo title, `lang=en`, one h1/main, no missing alts or unlabeled buttons, and no console errors.
 - The browser suite uses the pinned `@axe-core/playwright` integration on the landing, demo, legal, and missing-route pages with no serious/critical violations. The standalone axe CLI was incompatible with the supplied browser/ChromeDriver pair; see `polish-2.md`.
+- Deployment: `/opt/fleet/lib/deploy-static.sh deposit-deadline-bridge dist` completed Azure Static Web Apps deployment `eeead0eb-54d7-44b3-9bb7-a20cb62fb281`.
+- Cold live verification: `npm run test:live` passed after deploy. `https://deposit-deadline-bridge.sociobot.in/?demo=1` loaded HT-084 with the Demo title, sticky banner at the export controls, and a working Reset demo. `/`, `/privacy`, `/terms`, and an unknown route had the expected title, one h1/main, common header/footer, and the unknown route returned HTTP 404. Live URL-verifier screenshots/report are in `.factory/evidence/polish-2/live-query-demo/`.
 
 ## Known gaps
 
-None in the repaired product. Deployment and cold live-site verification are recorded after the release push.
+None.
