@@ -1,0 +1,5 @@
+body { margin: 0; background: #f8faf7; color: #172a30; font: 16px/1.55 system-ui, sans-serif; }
+main { max-width: 42rem; margin: 12vh auto; padding: 24px; }
+h1 { font: 400 clamp(2.5rem, 9vw, 5rem)/1 Georgia, serif; letter-spacing: -.04em; }
+a { color: #0d4658; }
+div { width: 11rem; height: 5rem; border-bottom: 6px solid #165b70; border-radius: 50%; margin-bottom: 3rem; }

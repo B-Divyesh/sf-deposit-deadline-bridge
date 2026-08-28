@@ -1,6 +1,10 @@
 node_modules/
 dist/
 .env
+test-results/
+playwright-report/
+.factory/evidence/
+assets/src/rejected/
 *.log
 graphify-out/
 .DS_Store
