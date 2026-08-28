@@ -19,7 +19,7 @@ Run on 2026-08-28 UTC after a clean `npm ci`:
 | --- | --- |
 | `npm ci` | Passed; 62 packages, 0 vulnerabilities. |
 | `npm run test:unit` | Passed; 3 Vitest tests, including spring-gap rejection and fall-overlap UTC selection. |
-| `npm test` | Passed; 24 Chromium tests, including all 13 exact claim commands, desktop/mobile, keyboard, axe serious/critical scans, offline reload, and update-compatible precache behavior. |
+| `npm test` | Passed; 24 Chromium tests, including desktop/mobile, keyboard, axe serious/critical scans, offline reload, and update-compatible precache behavior. Each of the 13 exact commands listed in `.factory/claims.json` was also invoked separately and passed. |
 | `npm audit --audit-level=moderate` | Passed; 0 vulnerabilities. |
 | `npm run build` | Passed; TypeScript check and Vite production build. `dist/index.html` is present. |
 | Static Web Apps emulator | `/demo` returned 200; `/missing-page` returned HTTP 404 and the designed 404 page; AVIF returned `Content-Type: image/avif`; application assets returned `max-age=3600` without `immutable`. |
