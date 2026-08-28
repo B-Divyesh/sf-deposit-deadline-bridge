@@ -2,7 +2,7 @@
 
 Repair commit: `944c63955666ca6c90ccaa05d75e11c93dcb81fe`.
 
-Screenshots and URL-verifier reports: `.factory/evidence/polish-2/query-demo/` and `.factory/evidence/polish-2/live-query-demo/`. The direct sample URL is `https://deposit-deadline-bridge.sociobot.in/?demo=1`.
+Screenshots and URL-verifier reports: [local desktop](.factory/evidence/polish-2/query-demo/screenshot-desktop.png), [local mobile](.factory/evidence/polish-2/query-demo/screenshot-mobile.png), [live desktop](.factory/evidence/polish-2/live-query-demo/screenshot-desktop.png), [live mobile](.factory/evidence/polish-2/live-query-demo/screenshot-mobile.png), and their `verify.json` reports. The direct sample URL is `https://deposit-deadline-bridge.sociobot.in/?demo=1`.
 
 | Finding | Change made | Evidence |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Screenshots and URL-verifier reports: `.factory/evidence/polish-2/query-demo/` a
 
 ## Verification
 
-- Fresh clone at `/tmp/deadline-clean-VojCZs`: `npm ci`, then all 15 exact commands from `.factory/claims.json` passed separately.
+- Fresh clone at `/tmp/deadline-clean-QsNdmA`: `npm ci`, then all 15 exact commands from `.factory/claims.json` passed separately; Playwright recorded `{"status":"passed","failedTests":[]}`.
 - Fresh clone: `npm run test:unit` (3 passed), `npm test` (30 passed), `npm run build`, and `npm audit --audit-level=moderate` (0 vulnerabilities).
 - Local direct demo: `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/?demo=1 .factory/evidence/polish-2/query-demo` passed with title `Demo — Deposit Deadline Bridge`, `lang=en`, one h1/main, zero missing image alts, zero unlabeled buttons, and no console errors.
 - Accessibility is run in the browser suite with `@axe-core/playwright` on `/`, `/demo`, `/privacy`, `/terms`, and a missing route; serious/critical violations are required to be empty. The standalone axe CLI could not launch against the supplied Playwright Chromium because its bundled ChromeDriver supports Chrome 152 while the supplied browser is 145; the project’s pinned Playwright axe integration is the successful equivalent.

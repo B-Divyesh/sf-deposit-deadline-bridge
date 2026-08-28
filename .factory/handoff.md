@@ -19,7 +19,7 @@ npm run build
 
 ## Evidence
 
-- Fresh clone `/tmp/deadline-clean-VojCZs`: `npm ci`, every one of the 15 declared claim commands passed individually.
+- Fresh clone `/tmp/deadline-clean-QsNdmA`: `npm ci`, every one of the 15 declared claim commands passed individually; Playwright's final result was `{"status":"passed","failedTests":[]}`.
 - Fresh clone: `npm run test:unit` passed (3 tests); `npm test` passed (30 Playwright tests, including routes, mobile, offline, privacy, keyboard, and axe checks); `npm run build` passed; `npm audit --audit-level=moderate` found 0 vulnerabilities.
 - Production output: app JavaScript is 12.30 kB gzip and CSS is 4.90 kB gzip.
 - Local `verify-url.sh` evidence is at `.factory/evidence/polish-2/query-demo/`: direct `?demo=1` has the Demo title, `lang=en`, one h1/main, no missing alts or unlabeled buttons, and no console errors.
