@@ -28,11 +28,46 @@
     "sandbox": "fresh /demo sample; download the text export and assert separate deposit and final balance sections with their amounts and time zone"
   },
   {
+    "id": "copy-payment-instructions",
+    "claim": "Copies two plain payment instructions.",
+    "where": "workspace copy action, README",
+    "test": "npm test -- --grep @claim:copy-payment-instructions",
+    "sandbox": "fresh /demo sample; invoke Copy payment instructions and assert the browser clipboard receives both payment sections"
+  },
+  {
+    "id": "dst-precision",
+    "claim": "Rejects nonexistent daylight-saving times and preserves the chosen repeated time.",
+    "where": "workspace time-zone help, deadline controls, README",
+    "test": "npm test -- --grep @claim:dst-precision",
+    "sandbox": "fresh /demo; enter the New York spring gap and assert a validation error, then choose the second fall-back occurrence and assert its UTC instant in the ICS download"
+  },
+  {
     "id": "confirm-reminder",
     "claim": "The app never sends a reminder without user confirmation.",
     "where": "landing boundaries, reminder dialog, README",
     "test": "npm test -- --grep @claim:confirm-reminder",
     "sandbox": "fresh /demo sample; request a reminder, assert the editable review dialog opens, cancel it, and assert no mailto navigation occurred"
+  },
+  {
+    "id": "private-runtime",
+    "claim": "There are no analytics, advertising scripts, or remote fonts.",
+    "where": "privacy page, README",
+    "test": "npm test -- --grep @claim:private-runtime",
+    "sandbox": "fresh /demo; exercise an edit and export while recording requests, then assert no cross-origin request or remote font is present"
+  },
+  {
+    "id": "license-private",
+    "claim": "A license check sends only the saved license token to Sociobot.",
+    "where": "landing boundaries, privacy page, README",
+    "test": "npm test -- --grep @claim:license-private",
+    "sandbox": "fresh workspace with a mocked license endpoint; add schedule text, verify a token, and assert the only endpoint request contains only that token"
+  },
+  {
+    "id": "no-added-rules",
+    "claim": "The app does not add late fees or local invoice rules.",
+    "where": "landing boundaries, README",
+    "test": "npm test -- --grep @claim:no-added-rules",
+    "sandbox": "fresh /demo; change user payment wording, download instructions, and assert the wording is retained with no late-fee text added"
   },
   {
     "id": "demo-isolation",

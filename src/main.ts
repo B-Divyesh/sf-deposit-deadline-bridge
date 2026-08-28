@@ -1,12 +1,12 @@
 import './styles.css';
 import { blankSchedule, isSchedule, sampleSchedule, timeZones, type Schedule } from './model';
-import { calendarFile, displayDate, paymentInstructions, reminderDraft, safeFileName, zonedTimeToUtc } from './exports';
+import { analyzeLocalTime, calendarFile, displayDate, paymentInstructions, reminderDraft, safeFileName, zonedTimeToUtc } from './exports';
 import { deleteSchedule, listSchedules, saveSchedule } from './storage';
 import { cachedLicenseIsValid, captureLicense, checkoutUrl, removeLicense, storeLicense, verifyLicense } from './license';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-const BUILD_ID = 'v1.0.0';
+const BUILD_ID = 'v1.0.2';
 captureLicense();
 let premium = cachedLicenseIsValid();
 let schedule = blankSchedule();
@@ -153,7 +153,6 @@ function landingPage(): string {
       <section class="boundaries" aria-labelledby="boundaries-title">
         <div><p class="eyebrow">Narrow on purpose</p><h2 id="boundaries-title">It keeps dates, not money</h2></div>
         <ul>
-          <li>No card processing or debt collection.</li>
           <li>No automatic email sending.</li>
           <li>No late fees or local rules added for you.</li>
           <li>License checks never include schedule details.</li>
@@ -177,6 +176,19 @@ function landingPage(): string {
 
 function field(name: string, label: string, value: string, type = 'text', attrs = ''): string {
   return `<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" type="${type}" value="${escapeHtml(value)}" ${attrs} /></div>`;
+}
+
+function occurrenceField(kind: 'deposit' | 'balance', occurrence: 0 | 1 | undefined): string {
+  const selected = occurrence === 1 ? ' selected' : '';
+  const label = kind === 'deposit' ? 'Deposit' : 'Final balance';
+  return `<div class="field time-occurrence" id="${kind}-occurrence-field" hidden>
+    <label for="${kind}Occurrence">${label} repeated-time occurrence</label>
+    <select id="${kind}Occurrence" name="${kind}Occurrence" disabled>
+      <option value="0">First occurrence</option>
+      <option value="1"${selected}>Second occurrence</option>
+    </select>
+    <p class="field-help inline" id="${kind}-time-note" role="status"></p>
+  </div>`;
 }
 
 function scheduleForm(): string {
@@ -209,7 +221,7 @@ function scheduleForm(): string {
             ${field('locale', 'Number locale', s.locale, 'text', 'required inputmode="text" aria-describedby="locale-help"')}
             ${field('currency', 'Currency code', s.currency, 'text', 'required maxlength="3" pattern="[A-Za-z]{3}"')}
           </div>
-          <p class="field-help" id="time-zone-help">Use an IANA zone such as Europe/London so daylight-saving changes stay precise.</p>
+          <p class="field-help" id="time-zone-help">Use an IANA zone such as Europe/London. The app rejects missing clock times and lets you choose either repeated time.</p>
           <p class="field-help" id="locale-help">Example: en-US. You choose the locale; the app adds no local invoice rules.</p>
         </section>
 
@@ -219,7 +231,8 @@ function scheduleForm(): string {
             <fieldset class="milestone-editor">
               <legend><span>Payment 1</span> Deposit</legend>
               ${field('depositAmount', 'Deposit amount', s.deposit.amount, 'number', 'required min="0.01" step="0.01" inputmode="decimal"')}
-              ${field('depositDue', 'Deposit due date and time', s.deposit.dueLocal, 'datetime-local', 'required')}
+              ${field('depositDue', 'Deposit due date and time', s.deposit.dueLocal, 'datetime-local', 'required aria-describedby="deposit-time-note"')}
+              ${occurrenceField('deposit', s.deposit.occurrence)}
               ${field('depositReminder', 'Draft reminder this many days before', String(s.deposit.reminderDays), 'number', 'required min="0" max="90" step="1"')}
               <button class="button button-secondary draft-button" type="button" data-reminder="deposit">Review deposit email</button>
             </fieldset>
@@ -227,7 +240,8 @@ function scheduleForm(): string {
             <fieldset class="milestone-editor">
               <legend><span>Payment 2</span> Final balance</legend>
               ${field('balanceAmount', 'Final balance amount', s.balance.amount, 'number', 'required min="0.01" step="0.01" inputmode="decimal"')}
-              ${field('balanceDue', 'Final balance due date and time', s.balance.dueLocal, 'datetime-local', 'required')}
+              ${field('balanceDue', 'Final balance due date and time', s.balance.dueLocal, 'datetime-local', 'required aria-describedby="balance-time-note"')}
+              ${occurrenceField('balance', s.balance.occurrence)}
               ${field('balanceReminder', 'Draft reminder this many days before', String(s.balance.reminderDays), 'number', 'required min="0" max="90" step="1"')}
               <button class="button button-secondary draft-button" type="button" data-reminder="balance">Review balance email</button>
             </fieldset>
@@ -285,7 +299,7 @@ function licensePanel(): string {
 function summaryLine(s: Schedule): string {
   if (!s.deposit.dueLocal || !s.balance.dueLocal) return 'Add both deadlines to prepare the exports.';
   try {
-    return `Deposit ${displayDate(s.deposit.dueLocal, s.timeZone)} · Final balance ${displayDate(s.balance.dueLocal, s.timeZone)}`;
+    return `Deposit ${displayDate(s.deposit.dueLocal, s.timeZone, s.deposit.occurrence ?? 0)} · Final balance ${displayDate(s.balance.dueLocal, s.timeZone, s.balance.occurrence ?? 0)}`;
   } catch {
     return 'Check both dates before exporting.';
   }
@@ -303,7 +317,7 @@ function legalPage(kind: 'privacy' | 'terms'): string {
     <p class="legal-lede">${privacy ? 'This page explains what is stored and when a network request happens.' : 'These terms keep a small local utility clear and fair.'}</p>
     ${privacy ? `
       <section><h2>Schedule data</h2><p>Real schedules are stored in IndexedDB in your browser. Demo changes stay in memory and disappear when you leave or reset the demo.</p><p>The app does not send quote, client, payment, or date details to a server. JSON backup files are created only when you request them.</p></section>
-      <section><h2>License data</h2><p>If you buy or restore a license, the license token and its latest verdict are stored in localStorage. The app sends only that token to the Sociobot license service.</p><p>Sociobot and Dodo process checkout details under their own policies. This app does not receive card details.</p></section>
+      <section><h2>License data</h2><p>If you buy or restore a license, the license token and its latest verdict are stored in localStorage. The app sends only that token to the Sociobot license service.</p><p>Sociobot and Dodo process checkout details under their own policies.</p></section>
       <section><h2>Network and deletion</h2><p>App files load from this site and are cached for offline use. There are no analytics, advertising scripts, or third-party fonts.</p><p>Clear this site’s browser data to remove schedules and the license token. You can also remove the license inside the workspace.</p></section>` : `
       <section><h2>Use of the tool</h2><p>You remain responsible for checking every amount, date, time zone, reminder, and payment instruction before sharing it.</p><p>The app does not provide accounting, tax, legal, late-fee, or debt-collection advice.</p></section>
       <section><h2>One-time license</h2><p>The $24 license unlocks the full schedule library for this product. Sociobot and Dodo are the merchant of record and handle payment and refunds.</p><p>A refund or revoked license removes access to paid library features. Your free schedule and data exports remain available.</p></section>
@@ -332,15 +346,60 @@ function readForm(): Schedule {
     deposit: {
       amount: value('depositAmount'),
       dueLocal: value('depositDue'),
+      occurrence: Number(value('depositOccurrence')) === 1 ? 1 : 0,
       reminderDays: Number(value('depositReminder')),
     },
     balance: {
       amount: value('balanceAmount'),
       dueLocal: value('balanceDue'),
+      occurrence: Number(value('balanceOccurrence')) === 1 ? 1 : 0,
       reminderDays: Number(value('balanceReminder')),
     },
     updatedAt: new Date().toISOString(),
   };
+}
+
+function updateTimeDisambiguation(): boolean {
+  const zone = document.querySelector<HTMLInputElement>('#timeZone')?.value.trim() ?? '';
+  let allTimesExist = true;
+  (['deposit', 'balance'] as const).forEach((kind) => {
+    const due = document.querySelector<HTMLInputElement>(`#${kind === 'deposit' ? 'depositDue' : 'balanceDue'}`);
+    const field = document.querySelector<HTMLElement>(`#${kind}-occurrence-field`);
+    const choice = document.querySelector<HTMLSelectElement>(`#${kind}Occurrence`);
+    const note = document.querySelector<HTMLElement>(`#${kind}-time-note`);
+    if (!due || !field || !choice || !note || !due.value || !zone) {
+      if (field) field.hidden = true;
+      if (choice) choice.disabled = true;
+      if (due) due.setCustomValidity('');
+      return;
+    }
+    try {
+      const analysis = analyzeLocalTime(due.value, zone);
+      if (!analysis.candidates.length) {
+        allTimesExist = false;
+        field.hidden = true;
+        choice.disabled = true;
+        note.textContent = '';
+        due.setCustomValidity(`This local time does not exist in ${zone}. Move it to a valid local time.`);
+      } else if (analysis.candidates.length > 1) {
+        field.hidden = false;
+        choice.disabled = false;
+        due.setCustomValidity('');
+        note.textContent = `This clock time happens twice when daylight saving ends. Choose the occurrence you agreed (${analysis.offsetLabels.join(' or ')}).`;
+      } else {
+        field.hidden = true;
+        choice.disabled = true;
+        note.textContent = '';
+        due.setCustomValidity('');
+      }
+    } catch {
+      field.hidden = true;
+      choice.disabled = true;
+      note.textContent = '';
+      due.setCustomValidity('');
+    }
+  });
+  return allTimesExist;
 }
 
 function validSchedule(showErrors = true): boolean {
@@ -354,16 +413,17 @@ function validSchedule(showErrors = true): boolean {
   } catch {
     zoneInput?.setCustomValidity('Enter a valid IANA time zone, such as Europe/London.');
   }
+  const allTimesExist = updateTimeDisambiguation();
   let dateOrder = false;
   try {
-    dateOrder = zonedTimeToUtc(schedule.balance.dueLocal, schedule.timeZone).getTime() > zonedTimeToUtc(schedule.deposit.dueLocal, schedule.timeZone).getTime();
+    dateOrder = zonedTimeToUtc(schedule.balance.dueLocal, schedule.timeZone, schedule.balance.occurrence ?? 0).getTime() > zonedTimeToUtc(schedule.deposit.dueLocal, schedule.timeZone, schedule.deposit.occurrence ?? 0).getTime();
   } catch { /* native form reports missing dates */ }
   const dateError = document.querySelector<HTMLElement>('#date-error');
   if (dateError) dateError.hidden = dateOrder || !schedule.deposit.dueLocal || !schedule.balance.dueLocal;
   const nativeValid = form.checkValidity();
   if (showErrors && !nativeValid) form.reportValidity();
   if (showErrors && nativeValid && !dateOrder) document.querySelector<HTMLInputElement>('#balanceDue')?.focus();
-  return nativeValid && dateOrder;
+  return nativeValid && allTimesExist && dateOrder;
 }
 
 function toast(message: string): void {
@@ -384,6 +444,22 @@ function download(name: string, content: string, type: string): void {
   anchor.click();
   anchor.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function copyText(content: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(content);
+    return;
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = content;
+  textarea.setAttribute('readonly', '');
+  textarea.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+  document.body.append(textarea);
+  textarea.select();
+  const copied = document.execCommand('copy');
+  textarea.remove();
+  if (!copied) throw new Error('Clipboard unavailable');
 }
 
 function updateSummary(): void {
@@ -438,7 +514,7 @@ function bindWorkspace(): void {
   document.querySelector('#copy-instructions')?.addEventListener('click', async () => {
     if (!validSchedule()) return;
     try {
-      await navigator.clipboard.writeText(paymentInstructions(schedule));
+      await copyText(paymentInstructions(schedule));
       toast('Two payment instructions copied.');
     } catch {
       toast('The browser blocked copying. Download the text file instead.');
@@ -503,6 +579,7 @@ function bindWorkspace(): void {
   });
   bindLicense();
   updateOnlineState();
+  updateTimeDisambiguation();
 }
 
 function openReminder(kind: 'deposit' | 'balance'): void {

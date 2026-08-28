@@ -1,6 +1,8 @@
 export type Milestone = {
   amount: string;
   dueLocal: string;
+  /** Which matching instant to use when a local wall time occurs twice. */
+  occurrence?: 0 | 1;
   reminderDays: number;
 };
 
@@ -36,8 +38,8 @@ export function blankSchedule(): Schedule {
     timeZone: localTimeZone,
     paymentMethod: '',
     paymentReference: '',
-    deposit: { amount: '', dueLocal: '', reminderDays: 3 },
-    balance: { amount: '', dueLocal: '', reminderDays: 7 },
+    deposit: { amount: '', dueLocal: '', occurrence: 0, reminderDays: 3 },
+    balance: { amount: '', dueLocal: '', occurrence: 0, reminderDays: 7 },
     updatedAt: new Date().toISOString(),
   };
 }
@@ -54,8 +56,8 @@ export const sampleSchedule: Schedule = {
   timeZone: 'America/New_York',
   paymentMethod: 'Bank transfer to Northline Events',
   paymentReference: 'Use HT-084 as the payment reference.',
-  deposit: { amount: '2400', dueLocal: '2026-09-18T17:00', reminderDays: 3 },
-  balance: { amount: '5600', dueLocal: '2026-10-23T17:00', reminderDays: 7 },
+  deposit: { amount: '2400', dueLocal: '2026-09-18T17:00', occurrence: 0, reminderDays: 3 },
+  balance: { amount: '5600', dueLocal: '2026-10-23T17:00', occurrence: 0, reminderDays: 7 },
   updatedAt: '2026-08-28T09:00:00.000Z',
 };
 

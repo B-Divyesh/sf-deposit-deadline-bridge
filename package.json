@@ -1,6 +1,6 @@
 {
   "name": "deposit-deadline-bridge",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "playwright test",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run --config vitest.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.2",

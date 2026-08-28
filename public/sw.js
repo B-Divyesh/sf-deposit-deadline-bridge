@@ -1,10 +1,11 @@
-const VERSION = 'deadline-bridge-v1.0.1';
+const VERSION = 'deadline-bridge-build';
+const APP_ASSETS = [];
 const SHELL = [
   '/', '/demo', '/workspace', '/privacy', '/terms', '/offline.html', '/offline.css',
-  '/assets/app.js', '/assets/app.css',
   '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png', '/icons/icon-512.png',
   '/assets/hero-ceramic-768.avif', '/assets/hero-ceramic-1200.avif',
-  '/assets/hero-ceramic-768.webp', '/assets/hero-ceramic-1200.webp', '/assets/hero-ceramic-1200.jpg', '/assets/social-card.webp'
+  '/assets/hero-ceramic-768.webp', '/assets/hero-ceramic-1200.webp', '/assets/hero-ceramic-1200.jpg', '/assets/social-card.webp',
+  ...APP_ASSETS,
 ];
 
 self.addEventListener('install', (event) => {

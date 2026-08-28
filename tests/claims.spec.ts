@@ -11,7 +11,11 @@ test('@claim:offline-reload works offline after the first visit', async ({ page,
     if (!navigator.serviceWorker.controller) await new Promise<void>((resolve) => navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true }));
   });
   await expect.poll(() => page.evaluate(async () => Boolean(await caches.match('/demo')))).toBe(true);
-  await expect.poll(() => page.evaluate(async () => Boolean(await caches.match('/assets/app.js')))).toBe(true);
+  await expect.poll(() => page.evaluate(async () => {
+    const keys = await caches.keys();
+    const entries = await Promise.all(keys.map(async (key) => (await caches.open(key)).keys()));
+    return entries.flat().some((request) => /\/assets\/app-[\w-]+\.js$/.test(new URL(request.url).pathname));
+  })).toBe(true);
   await page.reload();
   await expect(page.locator('#projectName')).toHaveValue('Highland Glasshouse Supper');
   await context.setOffline(true);
@@ -66,6 +70,41 @@ test('@claim:two-payment-export exports separate instructions', async ({ page })
   expect(text).toContain('America/New_York');
 });
 
+test('@claim:copy-payment-instructions copies the two payment sections', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: 'http://127.0.0.1:4173' });
+  await page.goto('/demo');
+  await page.evaluate(() => {
+    Reflect.defineProperty(navigator.clipboard, 'writeText', {
+      configurable: true,
+      value: async (text: string) => { document.documentElement.dataset.copiedInstructions = text; },
+    });
+  });
+  await page.getByRole('button', { name: 'Copy payment instructions' }).click();
+  await expect(page.locator('#toast')).toHaveText('Two payment instructions copied.');
+  const copied = await page.locator('html').getAttribute('data-copied-instructions');
+  expect(copied).toContain('PAYMENT 1 — DEPOSIT');
+  expect(copied).toContain('PAYMENT 2 — FINAL BALANCE');
+});
+
+test('@claim:dst-precision rejects missing times and exports the selected repeated time', async ({ page }) => {
+  await page.goto('/demo');
+  await page.locator('#depositDue').fill('2026-03-08T02:30');
+  await page.getByRole('button', { name: 'Check demo schedule' }).click();
+  await expect.poll(() => page.locator('#depositDue').evaluate((input: HTMLInputElement) => input.validationMessage)).toContain('does not exist');
+
+  await page.locator('#depositDue').fill('2026-11-01T01:30');
+  await page.locator('#balanceDue').fill('2026-11-02T12:00');
+  await expect(page.locator('#deposit-occurrence-field')).toBeVisible();
+  await expect(page.getByText('This clock time happens twice when daylight saving ends.')).toBeVisible();
+  await page.locator('#depositOccurrence').selectOption('1');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download calendar' }).click();
+  const item = await downloadPromise;
+  const path = join(tmpdir(), `repeated-time-${Date.now()}.ics`);
+  await item.saveAs(path);
+  expect(await readFile(path, 'utf8')).toContain('DTSTART:20261101T063000Z');
+});
+
 test('@claim:confirm-reminder requires review before opening email', async ({ page }) => {
   await page.goto('/demo');
   const before = page.url();
@@ -77,6 +116,49 @@ test('@claim:confirm-reminder requires review before opening email', async ({ pa
   await dialog.getByRole('button', { name: 'Keep editing' }).click();
   await expect(dialog).not.toBeVisible();
   expect(page.url()).toBe(before);
+});
+
+test('@claim:private-runtime makes no third-party request or font load during the demo flow', async ({ page }) => {
+  const externalRequests: string[] = [];
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (!['127.0.0.1', 'localhost'].includes(url.hostname)) externalRequests.push(request.url());
+  });
+  await page.goto('/demo');
+  await page.locator('#projectName').fill('Private winter dinner');
+  await page.getByRole('button', { name: 'Check demo schedule' }).click();
+  await page.getByRole('button', { name: 'Download payment instructions' }).click();
+  expect(externalRequests).toEqual([]);
+  expect(await page.evaluate(() => [...document.fonts].every((font) => !font.family.includes('http')))).toBe(true);
+});
+
+test('@claim:license-private sends only the pasted license token to the license service', async ({ page }) => {
+  const requests: string[] = [];
+  await page.route('https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/verify?license=private-license', (route) => {
+    requests.push(route.request().url());
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: false }) });
+  });
+  await page.goto('/workspace');
+  await page.locator('#projectName').fill('Schedule details must stay local');
+  await page.getByRole('button', { name: 'Paste a license' }).click();
+  await page.getByLabel('License token').fill('private-license');
+  await page.getByRole('button', { name: 'Verify license' }).click();
+  await expect(page.getByText('This license is not active. Check the token or buy a new license.')).toBeVisible();
+  expect(requests).toEqual(['https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/verify?license=private-license']);
+  expect(requests.join('')).not.toContain('Schedule');
+});
+
+test('@claim:no-added-rules keeps payment wording user-configured without adding late fees', async ({ page }) => {
+  await page.goto('/demo');
+  await page.locator('#paymentMethod').fill('Bank transfer only after the client confirms the account details');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download payment instructions' }).click();
+  const item = await downloadPromise;
+  const path = join(tmpdir(), `user-wording-${Date.now()}.txt`);
+  await item.saveAs(path);
+  const text = await readFile(path, 'utf8');
+  expect(text).toContain('Bank transfer only after the client confirms the account details');
+  expect(text.toLowerCase()).not.toContain('late fee');
 });
 
 test('@claim:demo-isolation resets sample changes after reload', async ({ page }) => {

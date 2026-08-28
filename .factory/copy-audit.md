@@ -28,7 +28,6 @@ Checked on 2026-08-28. Counts treat hyphenated terms as one word. Headings, acti
 | Check the email draft before your own email app opens it. | 11 | Pass |
 | Narrow on purpose | 3 | Pass |
 | It keeps dates, not money | 5 | Pass |
-| No card processing or debt collection. | 6 | Pass |
 | No automatic email sending. | 4 | Pass |
 | No late fees or local rules added for you. | 9 | Pass |
 | License checks never include schedule details. | 6 | Pass |

@@ -9,36 +9,79 @@ function formatMoney(value: string, currency: string, locale: string): string {
   }
 }
 
-export function displayDate(value: string, timeZone: string): string {
+export function displayDate(value: string, timeZone: string, occurrence = 0): string {
   if (!value) return 'Date not set';
-  const date = zonedTimeToUtc(value, timeZone);
+  const date = zonedTimeToUtc(value, timeZone, occurrence);
   return new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
     timeZone,
+    timeZoneName: 'short',
   }).format(date);
 }
 
-export function zonedTimeToUtc(value: string, timeZone: string): Date {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
-  if (!match) throw new Error('Enter a complete date and time.');
-  const wanted = Date.UTC(+match[1], +match[2] - 1, +match[3], +match[4], +match[5]);
-  let guess = wanted;
-  const formatter = new Intl.DateTimeFormat('en-CA', {
+type LocalTimeAnalysis = { candidates: Date[]; offsetLabels: string[] };
+
+function localParts(date: Date, timeZone: string): Record<string, string> {
+  return Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  });
-  for (let i = 0; i < 3; i += 1) {
-    const parts = Object.fromEntries(formatter.formatToParts(new Date(guess)).map((part) => [part.type, part.value]));
-    const rendered = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
-    guess += wanted - rendered;
-  }
-  return new Date(guess);
+  }).formatToParts(date).map((part) => [part.type, part.value]));
 }
 
-function icsDate(value: string, timeZone: string): string {
-  return zonedTimeToUtc(value, timeZone).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+function parseLocalTime(value: string): { wanted: number; parts: [string, string, string, string, string] } {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+  if (!match) throw new Error('Enter a complete date and time.');
+  return {
+    wanted: Date.UTC(+match[1], +match[2] - 1, +match[3], +match[4], +match[5]),
+    parts: [match[1], match[2], match[3], match[4], match[5]],
+  };
+}
+
+function offsetLabel(date: Date, timeZone: string): string {
+  const name = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    timeZoneName: 'shortOffset',
+  }).formatToParts(date).find((part) => part.type === 'timeZoneName')?.value;
+  return name || 'UTC offset';
+}
+
+/**
+ * Resolves all real instants matching a local date/time. A daylight-saving gap
+ * has no candidates; a repeated clock hour has two. Sampling offsets around
+ * the requested wall time handles zones with non-hour offsets too.
+ */
+export function analyzeLocalTime(value: string, timeZone: string): LocalTimeAnalysis {
+  const { wanted, parts: target } = parseLocalTime(value);
+  // This validates the IANA identifier before working out offsets.
+  const offsets = new Set<number>();
+  for (let timestamp = wanted - 36 * 3_600_000; timestamp <= wanted + 36 * 3_600_000; timestamp += 3_600_000) {
+    const rendered = localParts(new Date(timestamp), timeZone);
+    offsets.add(Date.UTC(+rendered.year, +rendered.month - 1, +rendered.day, +rendered.hour, +rendered.minute) - timestamp);
+  }
+  const candidates = [...offsets]
+    .map((offset) => new Date(wanted - offset))
+    .filter((date) => {
+      const rendered = localParts(date, timeZone);
+      return [rendered.year, rendered.month, rendered.day, rendered.hour, rendered.minute].every((part, index) => part === target[index]);
+    })
+    .sort((a, b) => a.getTime() - b.getTime());
+  return { candidates, offsetLabels: candidates.map((candidate) => offsetLabel(candidate, timeZone)) };
+}
+
+export function zonedTimeToUtc(value: string, timeZone: string, occurrence = 0): Date {
+  const analysis = analyzeLocalTime(value, timeZone);
+  if (!analysis.candidates.length) throw new Error(`This local time does not exist in ${timeZone}. Choose a valid local time.`);
+  if (occurrence < 0 || occurrence >= analysis.candidates.length) throw new Error('Choose one of the repeated local-time occurrences.');
+  return analysis.candidates[occurrence];
+}
+
+function icsDate(value: string, timeZone: string, occurrence = 0): string {
+  return zonedTimeToUtc(value, timeZone, occurrence).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
 
 function escapeIcs(value: string): string {
@@ -53,8 +96,8 @@ function icsEvent(schedule: Schedule, kind: 'Deposit' | 'Final balance'): string
     'BEGIN:VEVENT',
     `UID:${schedule.id}-${kind === 'Deposit' ? 'deposit' : 'balance'}@deposit-deadline-bridge`,
     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`,
-    `DTSTART:${icsDate(milestone.dueLocal, schedule.timeZone)}`,
-    `DTEND:${icsDate(milestone.dueLocal, schedule.timeZone)}`,
+    `DTSTART:${icsDate(milestone.dueLocal, schedule.timeZone, milestone.occurrence ?? 0)}`,
+    `DTEND:${icsDate(milestone.dueLocal, schedule.timeZone, milestone.occurrence ?? 0)}`,
     `SUMMARY:${escapeIcs(`${kind} due — ${schedule.projectName}`)}`,
     `DESCRIPTION:${escapeIcs(description)}`,
     'BEGIN:VALARM',
@@ -93,11 +136,11 @@ export function paymentInstructions(schedule: Schedule): string {
     '',
     'PAYMENT 1 — DEPOSIT',
     `Amount: ${formatMoney(schedule.deposit.amount, schedule.currency, schedule.locale)}`,
-    `Due: ${displayDate(schedule.deposit.dueLocal, schedule.timeZone)} (${schedule.timeZone})`,
+    `Due: ${displayDate(schedule.deposit.dueLocal, schedule.timeZone, schedule.deposit.occurrence ?? 0)} (${schedule.timeZone})`,
     '',
     'PAYMENT 2 — FINAL BALANCE',
     `Amount: ${formatMoney(schedule.balance.amount, schedule.currency, schedule.locale)}`,
-    `Due: ${displayDate(schedule.balance.dueLocal, schedule.timeZone)} (${schedule.timeZone})`,
+    `Due: ${displayDate(schedule.balance.dueLocal, schedule.timeZone, schedule.balance.occurrence ?? 0)} (${schedule.timeZone})`,
     '',
     `Payment method: ${schedule.paymentMethod}`,
     `Reference: ${schedule.paymentReference}`,
@@ -114,7 +157,7 @@ export function reminderDraft(schedule: Schedule, kind: 'deposit' | 'balance'): 
     body: [
       `Hello ${schedule.clientName},`,
       '',
-      `This is a reminder that the ${label} of ${formatMoney(milestone.amount, schedule.currency, schedule.locale)} is due ${displayDate(milestone.dueLocal, schedule.timeZone)} (${schedule.timeZone}).`,
+      `This is a reminder that the ${label} of ${formatMoney(milestone.amount, schedule.currency, schedule.locale)} is due ${displayDate(milestone.dueLocal, schedule.timeZone, milestone.occurrence ?? 0)} (${schedule.timeZone}).`,
       '',
       schedule.paymentMethod,
       schedule.paymentReference,

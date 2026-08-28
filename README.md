@@ -2,7 +2,7 @@
 
 Keep deposit and final payment dates intact when a quote becomes an invoice.
 
-Deposit Deadline Bridge is for event, catering, and project businesses. It records two negotiated deadlines with their exact time zone, then creates one calendar file and two plain payment instructions. Every reminder opens as an editable draft before the user chooses to open their email app.
+Deposit Deadline Bridge is for event, catering, and project businesses. It records two negotiated deadlines with an IANA time zone, rejects nonexistent daylight-saving times, lets you choose either repeated time, then creates one calendar file and two plain payment instructions. Every reminder opens as an editable draft before the user chooses to open their email app.
 
 Live site: <https://deposit-deadline-bridge.sociobot.in>
 
@@ -23,11 +23,11 @@ The sample is quote HT-084 for the Highland Glasshouse Supper. Demo changes are 
 - Works offline after the first visit.
 - Keeps one current schedule for free.
 
-The $24 one-time license adds an unlimited local schedule library. Checkout and license verification use the Sociobot billing API. No product or payment-provider secret is bundled into the app.
+The $24 one-time license adds an unlimited local schedule library. Checkout and license verification use the Sociobot billing API.
 
 ## Privacy and scope
 
-Schedule data stays in the browser. The app has no analytics, advertising scripts, remote fonts, card processing, debt collection, or automatic email sending. A license check sends only the saved license token to `api.sociobot.in`.
+Schedule data stays in the browser. The app has no analytics, advertising scripts, remote fonts, or automatic email sending. A license check sends only the saved license token to `api.sociobot.in`.
 
 Users choose the locale, currency, time zone, payment wording, and reminder timing. The app does not invent late fees or local invoice rules.
 

@@ -19,6 +19,20 @@ test('mobile workspace has no horizontal overflow and remains usable', async ({ 
   await expect(page.getByRole('button', { name: 'Download calendar' })).toBeVisible();
 });
 
+test('mobile navigation and footer links meet the 44 pixel target baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  for (const locator of [
+    page.getByRole('link', { name: 'Deposit Deadline Bridge home' }),
+    page.getByRole('navigation').getByRole('link', { name: 'Demo' }),
+    page.locator('.footer-links').getByRole('link', { name: 'Terms' }),
+  ]) {
+    const box = await locator.boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
+});
+
 test('keyboard reaches the primary demo action', async ({ page }) => {
   await page.goto('/');
   await page.keyboard.press('Tab');
