@@ -1,8 +1,25 @@
 # Deposit Deadline Bridge — handoff
 
-## What was built
+## Independent verification result — FAIL
 
-A production-ready Vite and TypeScript PWA now preserves one quote’s deposit and final balance as separate payment milestones.
+Candidate `4c89c3b8907565d79a8478b0615fafe8c3579698` was independently tested on 2026-08-28 against <https://deposit-deadline-bridge.sociobot.in>. The live artifacts match the candidate byte-for-byte, but the release is not acceptable.
+
+Release blockers:
+
+- **Critical:** the live $24 checkout URL returns HTTP 404 with `{"error":"enabled factory product","status":404}`. Purchase is impossible.
+- **High:** nonexistent DST local times are accepted and silently shifted in ICS export; repeated local times cannot be disambiguated.
+- **High:** `npm run test:unit` fails while collecting all three Playwright suites under Vitest.
+- **High:** several public privacy, exact-time, copy, and runtime claims have no entry/test in `.factory/claims.json`.
+
+Additional defects: missing paths return HTTP 200, some 390 px navigation/footer targets are smaller than 44 × 44 px, stable app filenames are cached immutable for one year, and AVIF is served as `application/octet-stream`.
+
+Passing evidence: all 8 listed claims, `npm test` (18/18), production build/type-check, audit, desktop/mobile core flow, IndexedDB persistence, normal and boundary-valid exports, invalid-input recovery, zero serious/critical axe findings, zero console errors, offline reload, simulated service-worker update, API rate limiting, and deployment identity. Lighthouse scored 97 performance and 100 accessibility/best-practices/SEO.
+
+The full evidence, commands, severity, and required release actions are in `.factory/verification.md`. Do not release this candidate.
+
+## Builder scope
+
+The builder implemented a Vite and TypeScript PWA intended to preserve one quote’s deposit and final balance as separate payment milestones.
 
 - Blank real workspace at `/workspace`, stored in IndexedDB.
 - Isolated, one-click sample workspace at `/demo`; demo changes stay in memory only.
@@ -36,7 +53,7 @@ npm run build
 
 The build output is `dist/`, and `dist/index.html` is at its root.
 
-## Verification completed
+## Builder-reported verification (superseded by the independent FAIL above)
 
 Run on 2026-08-28:
 
