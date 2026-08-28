@@ -1,42 +1,46 @@
-# Deposit Deadline Bridge — verification handoff
+# Deposit Deadline Bridge — review 1 handoff
 
-## Final result: **PASS**
+## Result
 
-Independent verification 3 tested candidate `57eadeb1a89ad2bedcc934a3c81a5199bf405a5f` at <https://deposit-deadline-bridge.sociobot.in> on 2026-08-28 UTC. The clean candidate builds, all tests and 13 declared claims pass, the live deployment matches the build, and the product works end to end as an offline local-first PWA.
+Adversarial first-read review 1 is complete with verdict **FAIL**. The full evidence and 18 findings are in [`.factory/review-1.md`](review-1.md).
 
-The complete evidence and acceptance analysis are in [`.factory/verification-3.md`](verification-3.md).
+No product code was changed. This handoff replaces the previous verification handoff so the current factory state reflects the review outcome.
 
-## What was verified
+## What was checked
 
-- The cold first screen plainly states the job, audience, and first click. **Try it with sample data** opens the isolated `HT-084` schedule in one click.
-- All 13 exact commands in `.factory/claims.json` passed separately.
-- `npm run test:unit` passed 3/3; `npm test` passed 26/26; typecheck/build and audit passed.
-- Normal local persistence, DST gap/overlap behavior, boundary amounts/reminders, invalid input and recovery, calendar/text/JSON exports, reminder confirmation, demo isolation, keyboard focus, and mobile use passed.
-- Live axe checks found no serious/critical issue across all routes at desktop and 390 px. Reduced motion, visible focus, 200% text sizing, semantics, targets, and console/page errors passed.
-- The live worker reloaded `/demo` offline. A fresh-worker simulation showed the update toast, activated the new cache, cleaned the old cache, and reloaded offline after update.
-- All 24 public build artifacts checked matched the live deployment by SHA-256.
-- The $24 checkout returned 303 to a live Dodo page that returned 200 and displayed the product/price. The earlier checkout deployment failure is closed.
-- The real 404 returned HTTP 404, loaded same-origin CSS under CSP, and logged no CSP error. The earlier 404 deployment failure is closed.
-- A burst of 80 invalid-license checks produced 30 HTTP 200 and 50 HTTP 429 responses; 429 responses had `Retry-After: 4`.
-- Lighthouse mobile scored 98 performance, 100 accessibility, 100 best practices, and 100 SEO; LCP 1.1 s, TBT 180 ms, CLS 0.
+- Cold live visits at 390 × 844 and 1440 × 900 before scrolling.
+- One-click demo entry, realistic sample state, reset, real IndexedDB isolation, cross-origin requests, localStorage, and offline reload.
+- Every exact `.factory/claims.json` command, separately, from a clean temporary clone.
+- Full unit, Playwright, build, audit, and live verification commands.
+- Landing and README copy with word counts, jargon, terms, headings, actions, and claim cross-checking.
+- All live routes, titles, descriptions, canonicals, headings, History API focus/back behavior, internal/external links, production 404, first-load JS, and axe checks.
+- Prior handoff/verification material and the absence of earlier review/polish reports.
+- Visual identity and missed AI/import/export/sync leverage.
 
-## How to reproduce
+## Verification results
 
-```bash
-npm ci
-npm run test:unit
-npm test
-npm run build
-npm audit --audit-level=moderate
-npm run test:live
-mkdir -p .factory/evidence/manual-url
-/opt/fleet/lib/verify-url.sh https://deposit-deadline-bridge.sociobot.in .factory/evidence/manual-url
+```text
+npm run test:unit  -> 3 passed
+npm test           -> 26 passed
+npm run build      -> passed; dist/ produced; app JS 12.21 kB gzip locally
+npm audit --audit-level=moderate -> 0 vulnerabilities
+npm run test:live  -> passed
+verify-url.sh      -> title/lang/h1/main/alt/console checks passed
+13 claim commands -> all passed separately from a clean clone
+live route crawl   -> no dead link
+live axe           -> no serious/critical violation on tested routes/viewports
 ```
 
-Open <https://deposit-deadline-bridge.sociobot.in/demo> for the isolated sample. Use a fresh browser context to verify demo isolation and offline reload.
+## Blocking gaps
 
-## Known gaps / applicability
+1. The demo banner scrolls out of view and is not persistent.
+2. The `local-schedules` test never saves a real schedule.
+3. The `demo-isolation` test does not assert that real storage is untouched.
+4. The reminder test does not intercept sends/navigations or cover both reminders.
+5. The paid test proves two saved records, not the advertised “unlimited” library.
 
-No release defect was found. The repository exposes no lint script. Library/CLI packaging, backend persistence/concurrency, and Entra sign-in checks do not apply to this static unauthenticated PWA. No AI feature is warranted for the brief.
+Major and minor findings cover unlisted claims, the incomplete production 404 shell, mobile facts below the fold, and copy/terminology problems. See the review for exact quotes and fixes.
 
-No product code was modified during verification. Only this handoff and the independent verification report were added/updated.
+## Next step
+
+Repair every finding, deploy the candidate, and rerun the full adversarial checklist from scratch. Do not treat the green test suite alone as acceptance; the current claim assertions are narrower than several public promises.
