@@ -2,7 +2,7 @@
 
 Repair commit: `944c63955666ca6c90ccaa05d75e11c93dcb81fe`.
 
-Screenshots and URL-verifier reports: [local desktop](.factory/evidence/polish-2/query-demo/screenshot-desktop.png), [local mobile](.factory/evidence/polish-2/query-demo/screenshot-mobile.png), [live desktop](.factory/evidence/polish-2/live-query-demo/screenshot-desktop.png), [live mobile](.factory/evidence/polish-2/live-query-demo/screenshot-mobile.png), and their `verify.json` reports. The direct sample URL is `https://deposit-deadline-bridge.sociobot.in/?demo=1`.
+Screenshots and URL-verifier reports: [local desktop](.factory/evidence/polish-2/query-demo/screenshot-desktop.png), [local mobile](.factory/evidence/polish-2/query-demo/screenshot-mobile.png), [final live desktop](.factory/evidence/polish-2/live-query-demo-round2/screenshot-desktop.png), [final live mobile](.factory/evidence/polish-2/live-query-demo-round2/screenshot-mobile.png), and their `verify.json` reports. The direct sample URL is `https://deposit-deadline-bridge.sociobot.in/?demo=1`.
 
 | Finding | Change made | Evidence |
 | --- | --- | --- |
@@ -38,3 +38,4 @@ Screenshots and URL-verifier reports: [local desktop](.factory/evidence/polish-2
 - Accessibility is run in the browser suite with `@axe-core/playwright` on `/`, `/demo`, `/privacy`, `/terms`, and a missing route; serious/critical violations are required to be empty. The standalone axe CLI could not launch against the supplied Playwright Chromium because its bundled ChromeDriver supports Chrome 152 while the supplied browser is 145; the project’s pinned Playwright axe integration is the successful equivalent.
 - Static deployment: Azure Static Web Apps deployment `eeead0eb-54d7-44b3-9bb7-a20cb62fb281` completed successfully. `npm run test:live` passed afterward.
 - Cold live browser check: `/?demo=1` had title `Demo — Deposit Deadline Bridge`, quote `HT-084`, the sticky banner at the export controls, and Reset demo restored `Highland Glasshouse Supper`. `/`, `/privacy`, `/terms`, and `/regression-missing-page` had one h1/main plus the common header/footer; the missing route returned HTTP 404. The only console event was the expected browser report for that deliberately requested 404.
+- Final deployment: Azure Static Web Apps deployment `be477701-a44d-4f57-87e1-318359495f6e` completed successfully. `npm run test:live` passed. A fresh 390 px browser context rechecked `/?demo=1`, `/`, `/privacy`, `/terms`, and `/regression-missing-page`; the banner remained at y=0 after scrolling, reset restored HT-084, first-screen copy includes catering and final balance, and the designed 404 returned HTTP 404 with the shared header/footer. Final URL-verifier evidence is in `.factory/evidence/polish-2/live-query-demo-round2/`.

@@ -26,6 +26,7 @@ npm run build
 - The browser suite uses the pinned `@axe-core/playwright` integration on the landing, demo, legal, and missing-route pages with no serious/critical violations. The standalone axe CLI was incompatible with the supplied browser/ChromeDriver pair; see `polish-2.md`.
 - Deployment: `/opt/fleet/lib/deploy-static.sh deposit-deadline-bridge dist` completed Azure Static Web Apps deployment `eeead0eb-54d7-44b3-9bb7-a20cb62fb281`.
 - Cold live verification: `npm run test:live` passed after deploy. `https://deposit-deadline-bridge.sociobot.in/?demo=1` loaded HT-084 with the Demo title, sticky banner at the export controls, and a working Reset demo. `/`, `/privacy`, `/terms`, and an unknown route had the expected title, one h1/main, common header/footer, and the unknown route returned HTTP 404. Live URL-verifier screenshots/report are in `.factory/evidence/polish-2/live-query-demo/`.
+- Final deployment: `/opt/fleet/lib/deploy-static.sh deposit-deadline-bridge dist` completed Azure Static Web Apps deployment `be477701-a44d-4f57-87e1-318359495f6e`. `npm run test:live` passed. A cold 390 px browser rechecked the direct demo, sticky banner/reset, first-screen catering and final balance wording, legal routes, and shared HTTP 404 shell. Final live screenshots and URL report are in `.factory/evidence/polish-2/live-query-demo-round2/`.
 
 ## Known gaps
 
