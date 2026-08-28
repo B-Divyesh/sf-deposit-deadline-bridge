@@ -42,8 +42,14 @@ Open `/demo` for the isolated sample. It uses the bundled HT-084 sample and neve
 
 ## Deployment and known external dependency
 
-Deploy `dist/` as the existing static PWA using `/opt/fleet/lib/deploy-static.sh deposit-deadline-bridge dist`.
+Deployed the existing static PWA class to <https://deposit-deadline-bridge.sociobot.in> from commit `1ea4e2bacdebe55cd8a4e08890f30cd8b89b1333`. The SHA-256 of live `assets/app-BZ4X6fAO.js` matched `dist/assets/app-BZ4X6fAO.js`:
 
-The source uses the required Sociobot checkout URL and existing license verification flow. At repair time, `GET https://api.sociobot.in/api/v1/products/deposit-deadline-bridge` returned HTTP 404 and the public product catalogue did not list this slug, so the hosted $24 checkout cannot be made live by repository code. Product registration/enabling belongs to the factory billing system, not this repository. After the factory enables `deposit-deadline-bridge`, verify that its `/checkout` response redirects to hosted checkout and that the return `?license=` token verifies successfully.
+```text
+b062d32ddbda44bf9d73cead55ccf76a5cb6b4f36d9968098af1ce652b293c98
+```
+
+Post-deploy `verify-url.sh` passed at the live URL with a 615 ms load, zero console errors, title/language/one h1/main/alt/button checks all passing. Live `/missing-page` returns HTTP 404 with the designed page, and live AVIF returns `Content-Type: image/avif` with `Cache-Control: public, max-age=3600`.
+
+The source uses the required Sociobot checkout URL and existing license verification flow. At repair time and again immediately after deploy, `GET https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/checkout` returned HTTP 404 with `{"error":"enabled factory product","status":404}`; the public product catalogue also did not list this slug. This still blocks a visitor from purchasing the advertised library and cannot be repaired by repository code. Product registration/enabling belongs to the factory billing system, not this repository. After the factory enables `deposit-deadline-bridge`, verify that its `/checkout` response redirects to hosted checkout and that the return `?license=` token verifies successfully.
 
 No other known product gaps remain. Calendar import behavior remains dependent on the user’s calendar app, and data remains local-first with optional JSON backups.
