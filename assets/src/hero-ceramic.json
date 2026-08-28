@@ -1,0 +1,10 @@
+{
+  "asset": "hero-ceramic.png",
+  "generated_at": "2026-08-28",
+  "tool": "/opt/fleet/lib/gen-image.sh",
+  "deployment": "factory-image",
+  "size": "1536x1024",
+  "quality": "high",
+  "prompt": "Use case: stylized-concept. Asset type: wide landing-page hero illustration for a local-first payment deadline utility. Scene: minimal icy ceramic studio tabletop with faint incised lines suggesting a calendar grid, no horizon. Subject: exactly two distinct hand-built round porcelain milestone tokens on the right half, joined by one slim arched bridge made from deep cobalt-glazed ceramic. Style: refined editorial still-life photography with restrained surreal scale. Materials: matte white stoneware, translucent pale-blue glaze, deep cobalt glaze, tiny handmade edge variation. Composition: landscape, slightly elevated three-quarter view, generous quiet negative space on the left, clear silhouette, no cropping of the two tokens. Lighting: cool north-window light with long soft graphite shadows, calm winter morning. Palette: glacier white, mineral blue, deep cobalt, graphite shadow, trace of warm kiln clay. Avoid: text, letters, numerals, logos, people, hands, clocks, coins, credit cards, generic office equipment, glossy plastic, gradients, visual clutter. No text, no watermark, no logos.",
+  "review": "Accepted. Exactly two porcelain markers and one cobalt bridge. No text, logos, people, malformed shapes, or unintended symbols. Calendar scoring is subtle and continuous."
+}
