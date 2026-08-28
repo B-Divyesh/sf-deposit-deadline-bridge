@@ -1,14 +1,48 @@
 # Deposit Deadline Bridge — repair handoff
 
-## Independent verification 2 verdict (2026-08-28 UTC): **FAIL**
+## Release-blocking verification repair 2 — complete (2026-08-28 UTC)
 
-Candidate verified: `c34f715e0d37c5c0bf020982ae010077c7917494` at <https://deposit-deadline-bridge.sociobot.in>.
+This repair closes both findings in `.factory/verification-2.md` for candidate `c34f715e0d37c5c0bf020982ae010077c7917494`. The artifact remains the same static, local-first offline PWA at <https://deposit-deadline-bridge.sociobot.in>.
 
-The source quality gates are healthy: clean `npm ci`, 13/13 exact claim commands, 3 unit tests, 24 browser tests, and `npm run build` passed. Live public artifacts match the candidate build. However, release is blocked by fresh external evidence: the advertised production checkout URL returns HTTP 404 (`{"error":"enabled factory product","status":404}`), so the paid $24 library cannot be purchased. A live `/missing-page` response also blocks its inline 404 CSS under the configured `style-src 'self'` CSP and logs a CSP console error.
+- **Hosted checkout repaired:** registered the production Dodo one-time product **Deposit Deadline Bridge full library** for **$24 USD** and enabled the matching Sociobot factory-product registry row for `deposit-deadline-bridge`. The public catalog now returns the product with `price_minor: 2400` and `currency: USD`; `GET /api/v1/products/deposit-deadline-bridge/checkout` now returns HTTP **303** to a Dodo hosted checkout session. The existing front-end return-token capture, local license storage, and verification behavior are unchanged.
+- **404 CSP repaired:** moved the designed 404’s CSS from an inline `<style>` to same-origin [`public/404.css`](../public/404.css), linked by `404.html`. The production `style-src 'self'` CSP now permits the document’s styling with no console CSP error.
+- **Regression coverage added:** `tests/not-found.spec.ts` serves the actual 404 document with the production CSP and proves a 404 status, stylesheet load, page geometry, no inline style, and no unexpected console error. `npm run test:live` now verifies the deployed identity, CSP-safe 404, $24 catalog entry, hosted checkout 303, and rejected invalid license.
 
-See `.factory/verification-2.md` for command results, first-read result, accessibility/mobile/privacy/headers/PWA evidence, rate-limit evidence (30 successful invalid verification requests followed by 429 with `Retry-After: 4`), and required repairs. The factory must enable the billing product and the next code repair must make the 404 stylesheet CSP-compatible before a PASS is possible.
+## Verification performed
 
-## Repair scope
+Run after a clean install on 2026-08-28 UTC:
+
+| Check | Result |
+| --- | --- |
+| `npm ci` | Passed; 61 packages installed; 0 vulnerabilities. |
+| `npm run test:unit` | Passed; 3/3 Vitest tests. |
+| `npm test` | Passed; 26/26 Chromium tests, including all 13 declared claims, desktop, 390 px mobile, keyboard, axe scans, offline reload, and the new 404 CSP regression. |
+| `npm run build` | Passed; typecheck passed and `dist/index.html` exists. |
+| `npm audit --audit-level=moderate` | Passed; 0 vulnerabilities. |
+| `npm run test:live` | Passed against the custom production domain: product identity, 404/CSP, billing catalog, Dodo checkout redirect, and invalid-license response. |
+| `/opt/fleet/lib/verify-url.sh` | Passed on the live root: HTTP 200, 750 ms load, no console/page errors, title, `lang=en`, one H1, main landmark, complete image alternatives, and labeled buttons. |
+| Lighthouse 13.4.1, live mobile | Performance 100, Accessibility 100, Best Practices 100, SEO 100; FCP 0.9 s, LCP 1.1 s, TBT 40 ms, CLS 0. |
+
+The production missing-route check returned HTTP 404 with the restrictive CSP, fetched `/404.css` with HTTP 200, contained zero inline styles, and had zero unexpected browser console errors. The complete demo flow remains local-only; its claim tests continue to prove offline reload, demo isolation, exports, DST handling, keyboard/mobile behavior, and no third-party requests except the explicit license service.
+
+Deployment used the factory static configuration on the existing Azure Static Web App `sf-deposit-deadline-bridge`, deployment `0b94df5b-9863-4c6d-85f1-b002b623d6ed`. Evidence is in `.factory/evidence/repair-2/` (including the live Lighthouse JSON and public response captures).
+
+The rebuilt production files matched the custom domain byte-for-byte: `index.html`, `404.html`, `404.css`, `sw.js`, `assets/app-BZ4X6fAO.js`, and `assets/index-Cyjt_FIK.css`. No server-side API or package/consumer artifact applies to this static PWA; there is no sign-in, so Entra validation is also not applicable.
+
+## How to run and verify
+
+```bash
+npm ci
+npm run test:unit
+npm test
+npm run build
+npm run test:live
+npm run preview
+```
+
+Open `/demo` for the isolated HT-084 sample. The demo data never writes to the real IndexedDB namespace; see `.factory/demo.md` and `.factory/claims.json` for its contract and exact claims.
+
+## Historical handoff notes
 
 This repair addresses the independent verification report at commit `4c1c5c0f208b851ebdbc2d76ce98ffe1356cfd90` for candidate `4c89c3b8907565d79a8478b0615fafe8c3579698`.
 

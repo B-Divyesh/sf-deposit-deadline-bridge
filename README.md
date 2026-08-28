@@ -53,6 +53,8 @@ npm run build
 
 `npm test` builds and serves the production app, then runs the claim and accessibility checks in Chromium. The exact production build command is `npm run build`. Static output lands in `dist/`, with `dist/index.html` at its root.
 
+After deployment, run `npm run test:live` to verify the public route, CSP-safe 404, billing catalog, and hosted checkout.
+
 Claim definitions and their sandbox steps are in [`.factory/claims.json`](.factory/claims.json). The demo contract is in [`.factory/demo.md`](.factory/demo.md).
 
 ## Deploy
