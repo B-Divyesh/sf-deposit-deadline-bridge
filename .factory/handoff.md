@@ -1,46 +1,35 @@
-# Deposit Deadline Bridge — review 1 handoff
+# Deposit Deadline Bridge — polish 1 handoff
 
 ## Result
 
-Adversarial first-read review 1 is complete with verdict **FAIL**. The full evidence and 18 findings are in [`.factory/review-1.md`](review-1.md).
+All 18 findings in [review 1](review-1.md) are repaired. The repair is commit `fe46fef5d2cfc4df1589a3ce7a713d8f15ecbaf7`, pushed to `main` and deployed to <https://deposit-deadline-bridge.sociobot.in> through Azure Static Web Apps (`sf-deposit-deadline-bridge`, production).
 
-No product code was changed. This handoff replaces the previous verification handoff so the current factory state reflects the review outcome.
+[Polish evidence](polish-1.md) maps every finding to its change and proof. Live mobile captures are `.factory/evidence/live-landing-mobile.png` and `.factory/evidence/live-demo-mobile.png` (ignored generated evidence files).
 
-## What was checked
+## What changed
 
-- Cold live visits at 390 × 844 and 1440 × 900 before scrolling.
-- One-click demo entry, realistic sample state, reset, real IndexedDB isolation, cross-origin requests, localStorage, and offline reload.
-- Every exact `.factory/claims.json` command, separately, from a clean temporary clone.
-- Full unit, Playwright, build, audit, and live verification commands.
-- Landing and README copy with word counts, jargon, terms, headings, actions, and claim cross-checking.
-- All live routes, titles, descriptions, canonicals, headings, History API focus/back behavior, internal/external links, production 404, first-load JS, and axe checks.
-- Prior handoff/verification material and the absence of earlier review/polish reports.
-- Visual identity and missed AI/import/export/sync leverage.
+- Kept the ceramic-ledger visual identity while making the mobile first screen fit its headline, CTA, result note, and all three facts.
+- Made `/demo` a visibly persistent sticky sandbox warning; retained reset/real controls while the user scrolls.
+- Added `demo-ready` and strengthened real-storage, isolation, confirmation, and paid-library claim tests.
+- Removed untestable absolute/third-party copy, standardized **final balance**, and rewrote README/deployment copy in plain language.
+- Completed the static 404 shell and metadata; SPA routes now update social metadata as well as title, description, canonical, focus, and announcement.
+- Added the required catalog description, corrected copy audit, claims contract, and versioned build id (`v1.0.3`).
 
-## Verification results
+## Verification
 
 ```text
-npm run test:unit  -> 3 passed
-npm test           -> 26 passed
-npm run build      -> passed; dist/ produced; app JS 12.21 kB gzip locally
-npm audit --audit-level=moderate -> 0 vulnerabilities
-npm run test:live  -> passed
-verify-url.sh      -> title/lang/h1/main/alt/console checks passed
-13 claim commands -> all passed separately from a clean clone
-live route crawl   -> no dead link
-live axe           -> no serious/critical violation on tested routes/viewports
+npm run test:unit                         3 passed
+npm test -- --workers=4 --reporter=line   29 passed
+npm run build                             passed; dist/ produced
+npm audit --audit-level=moderate          0 vulnerabilities
+clean clone: npm ci + 14 claim commands   all passed separately
+npm run test:live                         passed after production deploy
 ```
 
-## Blocking gaps
+The browser suite includes axe serious/critical checks on `/`, `/demo`, `/privacy`, `/terms`, and a missing route; keyboard/focus, mobile overflow, first-screen facts, sticky demo controls, offline reload, static-404 CSP, and privacy/network behavior. The production build is 12.24 kB gzip JavaScript and 4.90 kB gzip CSS.
 
-1. The demo banner scrolls out of view and is not persistent.
-2. The `local-schedules` test never saves a real schedule.
-3. The `demo-isolation` test does not assert that real storage is untouched.
-4. The reminder test does not intercept sends/navigations or cover both reminders.
-5. The paid test proves two saved records, not the advertised “unlimited” library.
+Cold live checks confirmed the production HTML contains the repaired final-balance metadata and build asset, `/demo` shows the sample banner, and an unknown URL returns the styled 404 shell with legal links and metadata.
 
-Major and minor findings cover unlisted claims, the incomplete production 404 shell, mobile facts below the fold, and copy/terminology problems. See the review for exact quotes and fixes.
+## Known gaps
 
-## Next step
-
-Repair every finding, deploy the candidate, and rerun the full adversarial checklist from scratch. Do not treat the green test suite alone as acceptance; the current claim assertions are narrower than several public promises.
+None.
