@@ -1,0 +1,58 @@
+[
+  {
+    "id": "offline-reload",
+    "claim": "Works offline after the first visit.",
+    "where": "landing facts, README",
+    "test": "npm test -- --grep @claim:offline-reload",
+    "sandbox": "fresh Chromium context; open /demo, wait for the service worker, set the context offline, reload, and assert the sample schedule remains usable"
+  },
+  {
+    "id": "local-schedules",
+    "claim": "Your schedules stay in this browser.",
+    "where": "landing facts, privacy page, README",
+    "test": "npm test -- --grep @claim:local-schedules",
+    "sandbox": "fresh demo context; intercept the full flow and assert no cross-origin network request contains schedule data"
+  },
+  {
+    "id": "calendar-two-events",
+    "claim": "Downloads one calendar file with both payment deadlines.",
+    "where": "landing preview, workspace calendar action, README",
+    "test": "npm test -- --grep @claim:calendar-two-events",
+    "sandbox": "fresh /demo sample; download the ICS and assert exactly two VEVENT blocks, both labels, UTC date-times, and two alarms"
+  },
+  {
+    "id": "two-payment-export",
+    "claim": "Exports two plain payment instructions.",
+    "where": "landing steps, workspace export action, README",
+    "test": "npm test -- --grep @claim:two-payment-export",
+    "sandbox": "fresh /demo sample; download the text export and assert separate deposit and final balance sections with their amounts and time zone"
+  },
+  {
+    "id": "confirm-reminder",
+    "claim": "The app never sends a reminder without user confirmation.",
+    "where": "landing boundaries, reminder dialog, README",
+    "test": "npm test -- --grep @claim:confirm-reminder",
+    "sandbox": "fresh /demo sample; request a reminder, assert the editable review dialog opens, cancel it, and assert no mailto navigation occurred"
+  },
+  {
+    "id": "demo-isolation",
+    "claim": "Demo sample changes are not saved.",
+    "where": "demo banner, README",
+    "test": "npm test -- --grep @claim:demo-isolation",
+    "sandbox": "fresh /demo context; edit the sample, reload, and assert the original bundled value returns"
+  },
+  {
+    "id": "json-backup",
+    "claim": "Exports and imports a JSON backup.",
+    "where": "workspace actions, README",
+    "test": "npm test -- --grep @claim:json-backup",
+    "sandbox": "fresh /demo sample; export the JSON, change its project name, import it, and assert the changed data appears"
+  },
+  {
+    "id": "one-free-schedule",
+    "claim": "One schedule is free; the unlimited local library costs $24 once.",
+    "where": "landing facts, pricing, workspace license panel, README",
+    "test": "npm test -- --grep @claim:one-free-schedule",
+    "sandbox": "fresh context; assert price and checkout URL, verify a mocked valid license, and prove the paid library can retain two records while free mode retains one"
+  }
+]

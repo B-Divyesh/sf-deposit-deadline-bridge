@@ -1,0 +1,14 @@
+{
+  "slug": "deposit-deadline-bridge",
+  "title": "Deposit Deadline Bridge",
+  "summary": "Keep deposit and final payment dates intact when a quote becomes an invoice.",
+  "territory": "utilities",
+  "user": "An event, catering, or project business that quotes a deposit and final balance and needs those independently negotiated dates to survive conversion to an invoice.",
+  "smallest_useful_product": "A local quote attachment that defines deposit/final milestones, emits calendar files and reminder emails, and exports two clear payment instructions for any accounting system.",
+  "success_measure": "During a 60-day pilot, 90% of accepted quotes with deposits have both deadlines recorded and no deadline is retyped after invoice creation.",
+  "artifact_class": "pwa-offline",
+  "monetization": "one-time",
+  "constraints": "Never send payment reminders without user confirmation; store dates/time zones precisely; locale-specific invoice and late-fee rules remain user-configured.",
+  "confidence": 4,
+  "state": "BUILT"
+}
