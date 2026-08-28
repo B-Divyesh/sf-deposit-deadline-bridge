@@ -1,7 +1,7 @@
 const VERSION = 'deadline-bridge-build';
 const APP_ASSETS = [];
 const SHELL = [
-  '/', '/demo', '/workspace', '/privacy', '/terms', '/offline.html', '/offline.css',
+  '/', '/?demo=1', '/demo', '/workspace', '/privacy', '/terms', '/offline.html', '/offline.css',
   '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png', '/icons/icon-512.png',
   '/assets/hero-ceramic-768.avif', '/assets/hero-ceramic-1200.avif',
   '/assets/hero-ceramic-768.webp', '/assets/hero-ceramic-1200.webp', '/assets/hero-ceramic-1200.jpg', '/assets/social-card.webp',

@@ -2,10 +2,10 @@
 
 ## Entry point
 
-- Production: `https://deposit-deadline-bridge.sociobot.in/demo`
-- Local: `http://localhost:5173/demo`
+- Production: `https://deposit-deadline-bridge.sociobot.in/?demo=1` (also `/demo`)
+- Local: `http://localhost:5173/?demo=1` (also `/demo`)
 
-Opening `/demo` directly enters demo mode. The first rendered workspace already contains quote HT-084 for Maya Chen’s Highland Glasshouse Supper. It includes a $2,400 deposit, a $5,600 final balance, New York deadlines, bank-transfer wording, and two reminder lead times.
+Opening `?demo=1` directly enters demo mode. The first rendered workspace already contains quote HT-084 for Maya Chen’s Highland Glasshouse Supper. It includes a $2,400 deposit, a $5,600 final balance, New York deadlines, bank-transfer wording, and two reminder lead times.
 
 ## Isolation
 

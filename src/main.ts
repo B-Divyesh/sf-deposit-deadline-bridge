@@ -6,7 +6,7 @@ import { cachedLicenseIsValid, captureLicense, checkoutUrl, removeLicense, store
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-const BUILD_ID = 'v1.0.3';
+const BUILD_ID = 'v1.0.4';
 captureLicense();
 let premium = cachedLicenseIsValid();
 let schedule = blankSchedule();
@@ -17,7 +17,7 @@ let licenseNotice = '';
 const pageMeta: Record<string, { title: string; description: string }> = {
   '/': {
     title: 'Deposit Deadline Bridge — preserve payment dates',
-    description: 'Keep deposit and final-balance dates intact when a quote becomes an invoice.',
+    description: 'Keep deposit and final balance dates intact when a quote becomes an invoice.',
   },
   '/workspace': {
     title: 'Payment schedule — Deposit Deadline Bridge',
@@ -91,10 +91,10 @@ function landingPage(): string {
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Deposit Deadline Bridge</p>
-          <h1 tabindex="-1">Keep deposit and final-balance dates</h1>
-          <p class="hero-lede">For event and project businesses whose agreed payment dates disappear when a quote becomes an invoice.</p>
+          <h1 tabindex="-1">Keep deposit and final balance dates</h1>
+          <p class="hero-lede">For event, catering, and project businesses whose agreed payment dates disappear when a quote becomes an invoice.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="/demo" data-route>Try it with sample data</a>
+            <a class="button button-primary" href="/?demo=1" data-route>Try it with sample data</a>
             <span>Opens a complete two-payment schedule.</span>
           </div>
           <ul class="plain-facts" aria-label="Product facts">
@@ -151,7 +151,7 @@ function landingPage(): string {
       </section>
 
       <section class="boundaries" aria-labelledby="boundaries-title">
-        <div><p class="eyebrow">Narrow on purpose</p><h2 id="boundaries-title">It keeps dates, not money</h2></div>
+        <div><p class="eyebrow">What the app does not do</p><h2 id="boundaries-title">It keeps dates, not money</h2></div>
         <ul>
           <li>No automatic email sending.</li>
           <li>No late fees or local rules added for you.</li>
@@ -650,14 +650,16 @@ function bindRoutes(): void {
     link.addEventListener('click', (event) => {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      navigate(link.pathname);
+      navigate(`${link.pathname}${link.search}${link.hash}`);
     });
   });
 }
 
 function navigate(path: string): void {
-  if (demoMode && path !== '/demo') schedule = blankSchedule();
-  history.pushState({}, '', path);
+  const target = new URL(path, location.origin);
+  const targetIsDemo = target.pathname === '/demo' || target.searchParams.get('demo') === '1';
+  if (demoMode && !targetIsDemo) schedule = blankSchedule();
+  history.pushState({}, '', `${target.pathname}${target.search}${target.hash}`);
   window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   void renderRoute(true);
 }
@@ -669,7 +671,8 @@ function updateOnlineState(): void {
 
 async function renderRoute(focusHeading = true): Promise<void> {
   const known = ['/', '/workspace', '/demo', '/privacy', '/terms'];
-  const path = known.includes(location.pathname) ? location.pathname : '/404';
+  const demoQuery = location.pathname === '/' && new URLSearchParams(location.search).get('demo') === '1';
+  const path = demoQuery ? '/demo' : (known.includes(location.pathname) ? location.pathname : '/404');
   demoMode = path === '/demo';
   if (path === '/demo' && schedule.id !== sampleSchedule.id) schedule = structuredClone(sampleSchedule);
   if (path === '/workspace') {

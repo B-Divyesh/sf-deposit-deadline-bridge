@@ -22,10 +22,10 @@
   },
   {
     "id": "calendar-two-events",
-    "claim": "Downloads one calendar file with both payment deadlines.",
+    "claim": "Adds both deadlines to your calendar without typing them again.",
     "where": "landing preview, workspace calendar action, README",
     "test": "npm test -- --grep @claim:calendar-two-events",
-    "sandbox": "fresh /demo sample; download the ICS and assert exactly two VEVENT blocks, both labels, UTC date-times, and two alarms"
+    "sandbox": "fresh landing page; click the sample action once, then download the ICS and assert the populated deposit and final-balance dates become exactly two events with two alarms"
   },
   {
     "id": "two-payment-export",
@@ -91,9 +91,16 @@
     "sandbox": "fresh /demo sample; export the JSON, change its project name, import it, and assert the changed data appears"
   },
   {
+    "id": "schedule-settings",
+    "claim": "Choose the locale, currency, and time zone. Set your payment wording and reminder timing.",
+    "where": "README, workspace settings",
+    "test": "npm test -- --grep @claim:schedule-settings",
+    "sandbox": "fresh demo; change all five settings, then assert the instruction export uses the locale/currency/time-zone/wording and the calendar uses the chosen zone and both reminder lead times"
+  },
+  {
     "id": "one-free-schedule",
-    "claim": "One schedule is free; $24 unlocks a library for multiple schedules in this browser.",
-    "where": "landing facts, pricing, workspace license panel, README",
+    "claim": "Sociobot opens checkout and verifies a pasted license token. One schedule is free; $24 unlocks a library for multiple schedules in this browser.",
+    "where": "landing facts, pricing, workspace license panel, README paid-license sentence",
     "test": "npm test -- --grep @claim:one-free-schedule",
     "sandbox": "fresh context; assert price and checkout URL, verify a mocked valid license, and prove the paid library saves and reopens three records while free mode retains one"
   }

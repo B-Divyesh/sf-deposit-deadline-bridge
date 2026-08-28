@@ -69,7 +69,8 @@ test('@claim:local-schedules saves real schedules locally without exposing their
 test('@claim:demo-ready opens a complete sample schedule in one click', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
-  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page).toHaveURL(/\/?demo=1$/);
+  await expect(page).toHaveTitle('Demo — Deposit Deadline Bridge');
   await expect(page.getByLabel('Demo mode')).toBeVisible();
   await expect(page.locator('#quoteNumber')).toHaveValue('HT-084');
   await expect(page.locator('#projectName')).toHaveValue('Highland Glasshouse Supper');
@@ -82,8 +83,11 @@ test('@claim:demo-ready opens a complete sample schedule in one click', async ({
   await expect(page.getByRole('button', { name: 'Download payment instructions' })).toBeVisible();
 });
 
-test('@claim:calendar-two-events exports both deadlines and reminders', async ({ page }) => {
-  await page.goto('/demo');
+test('@claim:calendar-two-events exports both one-click sample deadlines and reminders', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page.locator('#depositDue')).toHaveValue('2026-09-18T17:00');
+  await expect(page.locator('#balanceDue')).toHaveValue('2026-10-23T17:00');
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download calendar' }).click();
   const item = await downloadPromise;
@@ -271,7 +275,41 @@ test('@claim:json-backup exports and imports a schedule backup', async ({ page }
   await expect(page.locator('#projectName')).toHaveValue('Imported winter supper');
 });
 
-test('@claim:one-free-schedule keeps one free record and unlocks multiple saved schedules for $24', async ({ page }) => {
+test('@claim:schedule-settings carries chosen locale, currency, time zone, wording, and reminder timing into exports', async ({ page }) => {
+  await page.goto('/?demo=1');
+  await expect(page.getByLabel('Demo mode')).toBeVisible();
+  await page.locator('#locale').fill('de-DE');
+  await page.locator('#currency').fill('EUR');
+  await page.locator('#timeZone').fill('Europe/London');
+  await page.locator('#paymentMethod').fill('Bank transfer after the signed event plan');
+  await page.locator('#paymentReference').fill('Use the client’s PO-88 reference');
+  await page.locator('#depositReminder').fill('5');
+  await page.locator('#balanceReminder').fill('11');
+
+  const instructionsDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download payment instructions' }).click();
+  const instructions = await instructionsDownload;
+  const instructionsPath = join(tmpdir(), `settings-${Date.now()}.txt`);
+  await instructions.saveAs(instructionsPath);
+  const instructionsText = await readFile(instructionsPath, 'utf8');
+  expect(instructionsText).toContain('Time zone: Europe/London');
+  expect(instructionsText).toMatch(/Amount: 2\.400,00\s?€/u);
+  expect(instructionsText).toContain('Bank transfer after the signed event plan');
+  expect(instructionsText).toContain('Use the client’s PO-88 reference');
+
+  const calendarDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download calendar' }).click();
+  const calendar = await calendarDownload;
+  const calendarPath = join(tmpdir(), `settings-${Date.now()}.ics`);
+  await calendar.saveAs(calendarPath);
+  const calendarText = await readFile(calendarPath, 'utf8');
+  expect(calendarText).toContain('DTSTART:20260918T160000Z');
+  expect(calendarText).toContain('DTSTART:20261023T160000Z');
+  expect(calendarText).toContain('TRIGGER:-P5D');
+  expect(calendarText).toContain('TRIGGER:-P11D');
+});
+
+test('@claim:one-free-schedule uses Sociobot checkout and license verification for a $24 multiple-schedule library', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('One schedule is free. The full library costs $24 once.')).toBeVisible();
   await expect(page.getByRole('link', { name: /Buy the full library/ }).first()).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/checkout');

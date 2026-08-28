@@ -1,6 +1,6 @@
 # Deposit Deadline Bridge
 
-Keep deposit and final-balance dates intact when a quote becomes an invoice.
+Keep deposit and final balance dates intact when a quote becomes an invoice.
 
 Deposit Deadline Bridge is for event, catering, and project businesses.
 
@@ -10,7 +10,7 @@ Live site: <https://deposit-deadline-bridge.sociobot.in>
 
 ## Try the isolated demo
 
-Open <https://deposit-deadline-bridge.sociobot.in/demo> or run the site locally and visit `/demo`.
+Open <https://deposit-deadline-bridge.sociobot.in/?demo=1> or run the site locally and visit `/?demo=1`.
 
 The sample is quote HT-084 for the Highland Glasshouse Supper. Demo changes are held in memory and are not saved to real schedules. Select **Reset demo** to restore the sample.
 
@@ -25,13 +25,13 @@ The sample is quote HT-084 for the Highland Glasshouse Supper. Demo changes are 
 - Works offline after the first visit.
 - Keeps one current schedule for free.
 
-The $24 one-time license lets you save and reopen multiple schedules in this browser. Sociobot handles checkout and license checks.
+The $24 one-time license lets you save and reopen multiple schedules in this browser. Sociobot opens checkout and verifies a pasted license token.
 
 ## Privacy and scope
 
 Schedule data stays in the browser. The app has no analytics, advertising scripts, remote fonts, or automatic email sending. A license check sends only the saved license token to `api.sociobot.in`.
 
-Users choose the locale, currency, time zone, payment wording, and reminder timing. The app does not invent late fees or local invoice rules.
+Choose the locale, currency, and time zone. Set your payment wording and reminder timing. The app does not invent late fees or local invoice rules.
 
 See [`/privacy`](https://deposit-deadline-bridge.sociobot.in/privacy) and [`/terms`](https://deposit-deadline-bridge.sociobot.in/terms).
 
@@ -44,7 +44,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`. The demo entry point is `http://localhost:5173/demo`.
+Open `http://localhost:5173`. The demo entry point is `http://localhost:5173/?demo=1`.
 
 ## Test and build
 
