@@ -1,5 +1,13 @@
 # Deposit Deadline Bridge — repair handoff
 
+## Independent verification 2 verdict (2026-08-28 UTC): **FAIL**
+
+Candidate verified: `c34f715e0d37c5c0bf020982ae010077c7917494` at <https://deposit-deadline-bridge.sociobot.in>.
+
+The source quality gates are healthy: clean `npm ci`, 13/13 exact claim commands, 3 unit tests, 24 browser tests, and `npm run build` passed. Live public artifacts match the candidate build. However, release is blocked by fresh external evidence: the advertised production checkout URL returns HTTP 404 (`{"error":"enabled factory product","status":404}`), so the paid $24 library cannot be purchased. A live `/missing-page` response also blocks its inline 404 CSS under the configured `style-src 'self'` CSP and logs a CSP console error.
+
+See `.factory/verification-2.md` for command results, first-read result, accessibility/mobile/privacy/headers/PWA evidence, rate-limit evidence (30 successful invalid verification requests followed by 429 with `Retry-After: 4`), and required repairs. The factory must enable the billing product and the next code repair must make the 404 stylesheet CSP-compatible before a PASS is possible.
+
 ## Repair scope
 
 This repair addresses the independent verification report at commit `4c1c5c0f208b851ebdbc2d76ce98ffe1356cfd90` for candidate `4c89c3b8907565d79a8478b0615fafe8c3579698`.
