@@ -105,6 +105,12 @@ Tokenizer: split each trimmed visible sentence, heading, and control label on wh
 
 No audited sentence exceeds 22 words. No banned marketing word occurs.
 
+## Catalog
+
+| Copy | Words | Result |
+| --- | ---: | --- |
+| Preserve deposit and final balance dates when a quote becomes an invoice. | 12 | Pass; verb-first and 73 characters |
+
 ## Terminology table
 
 | Concept | Product term |
