@@ -9,19 +9,25 @@ export function checkoutUrl(): string {
   return `${API_ROOT}/products/${PRODUCT_SLUG}/checkout`;
 }
 
-export function captureLicense(): void {
+/**
+ * Accept a checkout return token without treating URL text as proof of a purchase.
+ * A cached positive verdict can support offline use only after a prior successful
+ * verification; every newly returned or pasted token starts locked.
+ */
+export function captureLicense(): boolean {
   const url = new URL(window.location.href);
-  const token = url.searchParams.get('license');
-  if (!token) return;
+  const token = url.searchParams.get('license')?.trim();
+  if (!token) return false;
   localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(VERDICT_KEY, JSON.stringify({ valid: true, checkedAt: 0 }));
+  localStorage.setItem(VERDICT_KEY, JSON.stringify({ valid: false, checkedAt: 0 }));
   url.searchParams.delete('license');
   history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+  return true;
 }
 
 export function storeLicense(token: string): void {
   localStorage.setItem(TOKEN_KEY, token.trim());
-  localStorage.setItem(VERDICT_KEY, JSON.stringify({ valid: true, checkedAt: 0 }));
+  localStorage.setItem(VERDICT_KEY, JSON.stringify({ valid: false, checkedAt: 0 }));
 }
 
 export function removeLicense(): void {

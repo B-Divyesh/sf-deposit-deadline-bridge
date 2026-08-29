@@ -18,14 +18,14 @@ The sample is quote HT-084 for the Highland Glasshouse Supper. Demo changes are 
 
 - Stores real schedules in this browser.
 - Keeps the deposit and final balance as separate dated payments.
-- Downloads one `.ics` calendar containing both deadlines and both reminder alarms.
+- Downloads one calendar file with both deadlines and reminders.
 - Downloads or copies two payment instructions for an invoice or accounting system.
 - Opens editable reminder email drafts only after confirmation.
-- Exports and imports a JSON backup.
+- Downloads a backup file and restores a schedule from one.
 - Works offline after the first visit.
 - Keeps one current schedule for free.
 
-The $24 one-time license lets you save and reopen multiple schedules in this browser. Sociobot opens checkout and verifies a pasted license token.
+The $24 one-time license lets you save and reopen multiple schedules in this browser. Sociobot opens checkout and verifies returned or pasted license tokens.
 
 If a license becomes inactive, its schedule library closes. One free schedule and exports remain available.
 
@@ -49,6 +49,8 @@ npm run dev
 ```
 
 Open `http://localhost:5173`. The demo entry point is `http://localhost:5173/?demo=1`.
+
+Calendar downloads use `.ics`; backup files use JSON.
 
 ## Test and build
 

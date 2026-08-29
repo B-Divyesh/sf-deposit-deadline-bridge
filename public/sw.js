@@ -1,4 +1,4 @@
-const VERSION = 'deadline-bridge-build';
+const VERSION = 'deadline-bridge-build-1.0.7';
 const APP_ASSETS = [];
 const SHELL = [
   '/', '/?demo=1', '/demo', '/workspace', '/privacy', '/terms', '/offline.html', '/offline.css',

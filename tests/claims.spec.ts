@@ -257,10 +257,10 @@ test('@claim:demo-isolation leaves real storage byte-for-byte unchanged', async 
   expect(await savedSchedules(page)).toEqual(beforeSchedules);
 });
 
-test('@claim:json-backup exports and imports a schedule backup', async ({ page }) => {
+test('@claim:json-backup downloads and restores a schedule backup', async ({ page }) => {
   await page.goto('/demo');
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Export JSON backup' }).click();
+  await page.getByRole('button', { name: 'Download backup' }).click();
   const item = await downloadPromise;
   const path = join(tmpdir(), `backup-${Date.now()}.json`);
   await item.saveAs(path);
@@ -309,15 +309,10 @@ test('@claim:schedule-settings carries chosen locale, currency, time zone, wordi
   expect(calendarText).toContain('TRIGGER:-P11D');
 });
 
-test('@claim:one-free-schedule uses Sociobot checkout and license verification for a $24 multiple-schedule library', async ({ page }) => {
-  test.setTimeout(45_000);
-  await page.goto('/');
-  await expect(page.getByText('One schedule is free. The full library costs $24 once.')).toBeVisible();
-  await expect(page.getByRole('heading', { level: 2, name: 'Keep multiple payment schedules' })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Buy the full library/ }).first()).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/checkout');
-
-  await page.goto('/workspace');
-  const fillSchedule = async (quote: string, project: string) => {
+test('@claim:one-free-schedule verifies returned and pasted tokens before unlocking the $24 multiple-schedule library', async ({ browser }) => {
+  test.setTimeout(90_000);
+  const endpoint = 'https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/verify?license=';
+  const fillAndSave = async (page: import('@playwright/test').Page, quote: string, project: string) => {
     await page.locator('#quoteNumber').fill(quote);
     await page.locator('#projectName').fill(project);
     await page.locator('#clientName').fill('Asha Patel');
@@ -328,47 +323,92 @@ test('@claim:one-free-schedule uses Sociobot checkout and license verification f
     await page.locator('#paymentMethod').fill('Bank transfer');
     await page.locator('#paymentReference').fill(quote);
     await page.getByRole('button', { name: 'Save schedule' }).click();
-    await expect(page.locator('#save-state')).toHaveText('Saved in this browser.');
+    await expect(page.locator('#save-state')).not.toHaveText('The schedule could not be saved. Download a backup, then try again.');
   };
-  await fillSchedule('Q-1', 'First dinner');
-  await page.evaluate(() => history.pushState({}, '', '/'));
-  await page.reload();
-  await page.goto('/workspace');
-  await page.locator('#quoteNumber').fill('Q-2');
-  await page.locator('#projectName').fill('Second dinner');
-  await page.getByRole('button', { name: 'Save schedule' }).click();
-  await expect(page.locator('#save-state')).toHaveText('Saved in this browser.');
-  const count = await page.evaluate(async () => new Promise<number>((resolve, reject) => {
-    const request = indexedDB.open('deposit-deadline-bridge');
-    request.onsuccess = () => {
-      const countRequest = request.result.transaction('schedules').objectStore('schedules').count();
-      countRequest.onsuccess = () => resolve(countRequest.result);
-      countRequest.onerror = () => reject(countRequest.error);
-    };
-  }));
-  expect(count).toBe(1);
+  const saveThree = async (page: import('@playwright/test').Page, prefix: string) => {
+    await fillAndSave(page, `${prefix}-1`, 'First dinner');
+    await page.getByRole('button', { name: 'Duplicate this schedule' }).click();
+    await fillAndSave(page, `${prefix}-2`, 'Second dinner');
+    await page.getByRole('button', { name: 'Duplicate this schedule' }).click();
+    await fillAndSave(page, `${prefix}-3`, 'Third dinner');
+    expect(await savedSchedules(page)).toHaveLength(3);
+  };
+  const saveOnlyOne = async (page: import('@playwright/test').Page, prefix: string) => {
+    await fillAndSave(page, `${prefix}-1`, 'First dinner');
+    await fillAndSave(page, `${prefix}-2`, 'Second dinner');
+    expect(await savedSchedules(page)).toHaveLength(1);
+  };
 
-  await page.route('https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/verify?license=test-license', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ valid: true, reason: 'ok', expires_at: null }),
-  }));
-  await page.getByRole('button', { name: 'Paste a license' }).click();
-  await page.getByLabel('License token').fill('test-license');
-  await page.getByRole('button', { name: 'Verify license' }).click();
-  await expect(page.getByText('Full library active')).toBeVisible();
-  await page.getByRole('button', { name: 'Duplicate this schedule' }).click();
-  await page.locator('#quoteNumber').fill('Q-3');
-  await page.getByRole('button', { name: 'Save schedule' }).click();
-  await page.getByRole('button', { name: 'Duplicate this schedule' }).click();
-  await page.locator('#quoteNumber').fill('Q-4');
-  await page.getByRole('button', { name: 'Save schedule' }).click();
-  await expect(page.locator('.saved-library .saved-item')).toHaveCount(3);
+  const pastedContext = await browser.newContext();
+  const pastedPage = await pastedContext.newPage();
+  try {
+    await pastedPage.goto('/');
+    await expect(pastedPage.getByText('One schedule is free. The full library costs $24 once.')).toBeVisible();
+    await expect(pastedPage.getByRole('heading', { level: 2, name: 'Keep multiple payment schedules' })).toBeVisible();
+    await expect(pastedPage.getByRole('link', { name: /Buy the full library/ }).first()).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/checkout');
+    await pastedPage.goto('/workspace');
+    await saveOnlyOne(pastedPage, 'PASTED-FREE');
+    await pastedPage.route(`${endpoint}pasted-valid`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok', expires_at: null }) }));
+    await pastedPage.getByRole('button', { name: 'Paste a license' }).click();
+    await pastedPage.getByLabel('License token').fill('pasted-valid');
+    await pastedPage.getByRole('button', { name: 'Verify license' }).click();
+    await expect(pastedPage.getByText('Full library active')).toBeVisible();
+    await saveThree(pastedPage, 'PASTED-PAID');
+  } finally {
+    await pastedContext.close();
+  }
+
+  const invalidContext = await browser.newContext();
+  const invalidPage = await invalidContext.newPage();
+  try {
+    await invalidPage.route(`${endpoint}invalid-return`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: false, reason: 'invalid', expires_at: null }) }));
+    await invalidPage.goto('/workspace?license=invalid-return');
+    await expect(invalidPage).toHaveURL(/\/workspace$/);
+    await expect(invalidPage.getByText('License no longer active. The free schedule and exports still work.')).toBeVisible();
+    await expect(invalidPage.getByText('Full library active')).not.toBeVisible();
+    expect(JSON.parse(await invalidPage.evaluate(() => localStorage.getItem('sb_license_verdict:deposit-deadline-bridge') ?? '{}'))).toMatchObject({ valid: false });
+    await saveOnlyOne(invalidPage, 'INVALID');
+  } finally {
+    await invalidContext.close();
+  }
+
+  const offlineContext = await browser.newContext();
+  const offlinePage = await offlineContext.newPage();
+  try {
+    await offlinePage.goto('/demo');
+    await offlinePage.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) await new Promise<void>((resolve) => navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true }));
+    });
+    await offlinePage.reload();
+    await offlineContext.setOffline(true);
+    await offlinePage.goto('/workspace?license=offline-return');
+    await expect(offlinePage).toHaveURL(/\/workspace$/);
+    await expect(offlinePage.getByText('Full library active')).not.toBeVisible();
+    await expect(offlinePage.getByText('The license could not be verified. Connect and try again. The free schedule and exports still work.')).toBeVisible();
+    expect(JSON.parse(await offlinePage.evaluate(() => localStorage.getItem('sb_license_verdict:deposit-deadline-bridge') ?? '{}'))).toMatchObject({ valid: false, checkedAt: 0 });
+    await saveOnlyOne(offlinePage, 'OFFLINE');
+  } finally {
+    await offlineContext.close();
+  }
+
+  const returnedContext = await browser.newContext();
+  const returnedPage = await returnedContext.newPage();
+  try {
+    await returnedPage.route(`${endpoint}returned-valid`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ valid: true, reason: 'ok', expires_at: null }) }));
+    await returnedPage.goto('/workspace?license=returned-valid');
+    await expect(returnedPage).toHaveURL(/\/workspace$/);
+    await expect(returnedPage.getByText('Full library active')).toBeVisible();
+    expect(JSON.parse(await returnedPage.evaluate(() => localStorage.getItem('sb_license_verdict:deposit-deadline-bridge') ?? '{}'))).toMatchObject({ valid: true });
+    await saveThree(returnedPage, 'RETURNED');
+  } finally {
+    await returnedContext.close();
+  }
 });
 
-test('@claim:free-core-features keeps calendar, instructions, reminder review, and JSON backups free', async ({ page }) => {
+test('@claim:free-core-features keeps calendar, instructions, reminder review, and backup files free', async ({ page }) => {
   await page.goto('/workspace');
-  await expect(page.getByText('Calendar, instructions, reminder review, and JSON backups stay free.')).toBeVisible();
+  await expect(page.getByText('Calendar, instructions, reminder review, and backup files stay free.')).toBeVisible();
   await page.locator('#quoteNumber').fill('FREE-17');
   await page.locator('#projectName').fill('Free core dinner');
   await page.locator('#clientName').fill('Ravi Shah');
@@ -403,7 +443,7 @@ test('@claim:free-core-features keeps calendar, instructions, reminder review, a
   await page.getByRole('button', { name: 'Keep editing' }).click();
 
   const backupDownload = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Export JSON backup' }).click();
+  await page.getByRole('button', { name: 'Download backup' }).click();
   expect((await backupDownload).suggestedFilename()).toBe('free-17-deadline-bridge.json');
 });
 
@@ -482,7 +522,7 @@ test('@claim:license-revocation closes the paid library while free work remains 
   await expect(page.getByText('License no longer active. The free schedule and exports still work.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Download calendar' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Download payment instructions' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Export JSON backup' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Download backup' })).toBeVisible();
 });
 
 test('@claim:refund-request opens a pre-addressed refund request email', async ({ page }) => {

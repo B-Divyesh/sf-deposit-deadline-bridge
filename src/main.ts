@@ -6,13 +6,13 @@ import { cachedLicenseIsValid, captureLicense, checkoutUrl, removeLicense, store
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-const BUILD_ID = 'v1.0.6';
-captureLicense();
+const BUILD_ID = 'v1.0.7';
+const hasReturnedLicense = captureLicense();
 let premium = cachedLicenseIsValid();
 let schedule = blankSchedule();
 let savedSchedules: Schedule[] = [];
 let demoMode = false;
-let licenseNotice = '';
+let licenseNotice = hasReturnedLicense ? 'Checking the returned license. The free schedule and exports still work until it is verified.' : '';
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   '/': {
@@ -167,7 +167,7 @@ function landingPage(): string {
         <div class="price-block">
           <p class="price"><span>$</span>24</p>
           <a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">(opens Sociobot checkout)</span></a>
-          <p><a href="/terms" data-route>Read refund policy and terms</a></p>
+          <p><a class="legal-action" href="/terms" data-route>Read refund policy and terms</a></p>
         </div>
       </section>
     </main>`);
@@ -263,8 +263,8 @@ function scheduleForm(): string {
             <button class="button button-secondary" type="button" id="download-calendar">Download calendar</button>
             <button class="button button-secondary" type="button" id="download-instructions">Download payment instructions</button>
             <button class="button button-quiet" type="button" id="copy-instructions">Copy payment instructions</button>
-            <button class="button button-quiet" type="button" id="export-backup">Export JSON backup</button>
-            <label class="button button-quiet file-label" for="import-backup">Import JSON backup</label><input class="sr-only" type="file" id="import-backup" accept="application/json,.json" />
+            <button class="button button-quiet" type="button" id="export-backup">Download backup</button>
+            <label class="button button-quiet file-label" for="import-backup">Restore backup</label><input class="sr-only" type="file" id="import-backup" accept="application/json,.json" />
           </div>
         </section>
       </form>
@@ -288,7 +288,7 @@ function licensePanel(): string {
     <section class="license-panel" aria-labelledby="license-title"><div><p class="eyebrow">Full library active</p><h2 id="license-title">Your license is on this device</h2><p>You can save and reopen multiple schedules in this browser.</p></div><button class="button button-quiet" id="remove-license" type="button">Remove license</button></section>`;
   return `
     <section class="license-panel" aria-labelledby="license-title">
-      <div><p class="eyebrow">One current schedule is free</p><h2 id="license-title">Save multiple schedules for $24 once</h2><p>The license adds a library for multiple schedules in this browser. Calendar, instructions, reminder review, and JSON backups stay free.</p></div>
+      <div><p class="eyebrow">One current schedule is free</p><h2 id="license-title">Save multiple schedules for $24 once</h2><p>The license adds a library for multiple schedules in this browser. Calendar, instructions, reminder review, and backup files stay free.</p></div>
       <div class="license-actions"><a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">(opens Sociobot checkout)</span></a><button class="button button-secondary" id="show-license" type="button">Paste a license</button></div>
       ${licenseNotice ? `<p class="license-notice" role="status">${escapeHtml(licenseNotice)}</p>` : ''}
       <form id="license-form" class="license-form" hidden><div class="field"><label for="license-token">License token</label><input id="license-token" autocomplete="off" spellcheck="false" /></div><button class="button button-primary" type="submit">Verify license</button><p id="license-message" role="status"></p></form>
@@ -315,13 +315,13 @@ function legalPage(kind: 'privacy' | 'terms'): string {
     <h1 tabindex="-1">${privacy ? 'How your schedules are stored' : 'Terms for Deposit Deadline Bridge'}</h1>
     <p class="legal-lede">${privacy ? 'This page explains what is stored and when a network request happens.' : 'These terms keep a small local utility clear and fair.'}</p>
     ${privacy ? `
-      <section><h2>Schedule data</h2><p>Real schedules are stored in this browser. Demo changes stay in memory and disappear when you leave or reset the demo.</p><p>The app does not send quote, client, payment, or date details to a server. JSON backup files are created only when you request them.</p></section>
+      <section><h2>Schedule data</h2><p>Real schedules are stored in this browser. Demo changes stay in memory and disappear when you leave or reset the demo.</p><p>The app does not send quote, client, payment, or date details to a server. Backup files are created only when you request them.</p></section>
       <section><h2>License data</h2><p>If you buy or restore a license, this browser stores the license token and its latest verification result. The app sends only that token to the Sociobot license service.</p></section>
       <section><h2>Network and deletion</h2><p>App files load from this site and are cached for offline use. There are no analytics, advertising scripts, or third-party fonts.</p><p>Clear this site’s browser data to remove schedules and the license token. You can also remove the license inside the workspace.</p></section>` : `
       <section><h2>Use of the tool</h2><p>You remain responsible for checking every amount, date, time zone, reminder, and payment instruction before sharing it.</p><p>The app does not provide accounting, tax, legal, late-fee, or debt-collection advice.</p></section>
-      <section><h2>One-time license</h2><p>The $24 license adds a library for multiple schedules in this browser. Calendar exports, payment instructions, reminder review, and JSON backups stay free.</p><p>When a license check reports an inactive license, the paid library closes. One free schedule and exports remain available.</p></section>
-      <section><h2>Refund policy</h2><p>You can ask for a refund within 14 days of purchase.</p><p><a href="mailto:support@sociobot.in?subject=Deposit%20Deadline%20Bridge%20refund%20request">Request a refund by email</a>. Include the email address used at checkout and your receipt.</p></section>
-      <section><h2>Availability</h2><p>The software is provided as-is under the MIT License. Keep JSON backups of records you cannot afford to lose.</p><p>These terms apply from August 28, 2026.</p></section>`}
+      <section><h2>One-time license</h2><p>The $24 license adds a library for multiple schedules in this browser. Calendar exports, payment instructions, reminder review, and backup files stay free.</p><p>When a license check reports an inactive license, the paid library closes. One free schedule and exports remain available.</p></section>
+      <section><h2>Refund policy</h2><p>You can ask for a refund within 14 days of purchase.</p><p><a class="legal-action" href="mailto:support@sociobot.in?subject=Deposit%20Deadline%20Bridge%20refund%20request">Request a refund by email</a>. Include the email address used at checkout and your receipt.</p></section>
+      <section><h2>Availability</h2><p>The software is provided as-is under the MIT License. Keep backup files for records you cannot afford to lose.</p><p>These terms apply from August 28, 2026.</p></section>`}
   </main>`);
 }
 
@@ -497,7 +497,7 @@ function bindWorkspace(): void {
       if (premium) await renderRoute(false);
     } catch {
       const status = document.querySelector<HTMLElement>('#save-state');
-      if (status) status.textContent = 'The schedule could not be saved. Export a JSON backup, then try again.';
+      if (status) status.textContent = 'The schedule could not be saved. Download a backup, then try again.';
     }
   });
 
@@ -523,7 +523,7 @@ function bindWorkspace(): void {
   document.querySelector('#export-backup')?.addEventListener('click', () => {
     schedule = readForm();
     download(`${safeFileName(schedule.quoteNumber)}-deadline-bridge.json`, JSON.stringify({ version: 1, schedule }, null, 2), 'application/json');
-    toast('JSON backup downloaded.');
+    toast('Backup downloaded.');
   });
   document.querySelector<HTMLInputElement>('#import-backup')?.addEventListener('change', async (event) => {
     const input = event.currentTarget as HTMLInputElement;
@@ -534,7 +534,7 @@ function bindWorkspace(): void {
       if (!isSchedule(data.schedule)) throw new Error('invalid');
       schedule = { ...data.schedule, id: demoMode ? sampleSchedule.id : data.schedule.id, updatedAt: new Date().toISOString() };
       await renderRoute(false);
-      toast(demoMode ? 'Backup loaded into this demo tab.' : 'Backup loaded. Save it when ready.');
+      toast(demoMode ? 'Backup restored in this demo tab.' : 'Backup restored. Save it when ready.');
     } catch {
       toast('That file is not a Deposit Deadline Bridge backup. Choose another file.');
       input.value = '';
@@ -724,7 +724,13 @@ registerServiceWorker();
 
 if (localStorage.getItem('sb_license:deposit-deadline-bridge')) {
   void verifyLicense().then(async (valid) => {
-    if (!valid) licenseNotice = 'License no longer active. The free schedule and exports still work.';
-    if (!valid || premium !== valid) { premium = valid; await renderRoute(false); }
-  }).catch(() => { /* Keep the cached verdict while offline. */ });
+    premium = valid;
+    licenseNotice = valid ? '' : 'License no longer active. The free schedule and exports still work.';
+    await renderRoute(false);
+  }).catch(async () => {
+    if (!premium) {
+      licenseNotice = 'The license could not be verified. Connect and try again. The free schedule and exports still work.';
+      await renderRoute(false);
+    }
+  });
 }

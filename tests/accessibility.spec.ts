@@ -41,17 +41,18 @@ test('demo warning and controls remain visible after mobile export scrolling', a
   await expect(banner.getByRole('link', { name: 'Start for real' })).toBeVisible();
 });
 
-test('mobile navigation and footer links meet the 44 pixel target baseline', async ({ page }) => {
+test('every visible mobile action link and button meets the 44 pixel target baseline', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  for (const locator of [
-    page.getByRole('link', { name: 'Deposit Deadline Bridge home' }),
-    page.getByRole('navigation').getByRole('link', { name: 'Demo' }),
-    page.locator('.footer-links').getByRole('link', { name: 'Terms' }),
-  ]) {
-    const box = await locator.boundingBox();
-    expect(box?.width).toBeGreaterThanOrEqual(44);
-    expect(box?.height).toBeGreaterThanOrEqual(44);
+  for (const route of ['/', '/demo', '/workspace', '/privacy', '/terms']) {
+    await page.goto(route);
+    const targets = await page.locator('a[href], button, label.file-label').evaluateAll((elements) => elements.flatMap((element) => {
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      if (style.display === 'none' || style.visibility === 'hidden' || rect.width === 0 || rect.height === 0) return [];
+      return [{ label: (element.getAttribute('aria-label') || element.textContent || element.tagName).trim().replace(/\s+/g, ' '), width: rect.width, height: rect.height }];
+    }));
+    const undersized = targets.filter((target) => target.width < 44 || target.height < 44);
+    expect(undersized, `${route} has undersized action targets: ${JSON.stringify(undersized)}`).toEqual([]);
   }
 });
 

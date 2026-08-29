@@ -53,7 +53,7 @@ Tokenizer: split each trimmed visible sentence, heading, and control label on wh
 | Clear this site’s browser data to remove schedules and the license token. | 12 | Pass; `data-deletion` |
 | You can also remove the license inside the workspace. | 10 | Pass; `data-deletion` |
 | Terms for Deposit Deadline Bridge | 5 | Pass |
-| Calendar exports, payment instructions, reminder review, and JSON backups stay free. | 10 | Pass; `free-core-features` |
+| Calendar exports, payment instructions, reminder review, and backup files stay free. | 11 | Pass; `free-core-features` |
 | When a license check reports an inactive license, the paid library closes. | 12 | Pass; `license-revocation` |
 | One free schedule and exports remain available. | 7 | Pass; `license-revocation` |
 | You can ask for a refund within 14 days of purchase. | 11 | Pass; `refund-request` |
@@ -78,14 +78,14 @@ Tokenizer: split each trimmed visible sentence, heading, and control label on wh
 | Select Reset demo to restore the sample. | 7 | Pass |
 | Stores real schedules in this browser. | 6 | Pass; `local-schedules` |
 | Keeps the deposit and final balance as separate dated payments. | 10 | Pass; `calendar-two-events`, `two-payment-export` |
-| Downloads one `.ics` calendar containing both deadlines and both reminder alarms. | 11 | Pass; `calendar-two-events` |
+| Downloads one calendar file with both deadlines and reminders. | 9 | Pass; `calendar-two-events` |
 | Downloads or copies two payment instructions for an invoice or accounting system. | 12 | Pass; `two-payment-export`, `copy-payment-instructions` |
 | Opens editable reminder email drafts only after confirmation. | 8 | Pass; `confirm-reminder` |
-| Exports and imports a JSON backup. | 6 | Pass; `json-backup` |
+| Downloads a backup file and restores a schedule from one. | 10 | Pass; `json-backup` |
 | Works offline after the first visit. | 6 | Pass; `offline-reload` |
 | Keeps one current schedule for free. | 6 | Pass; `one-free-schedule` |
 | The $24 one-time license lets you save and reopen multiple schedules in this browser. | 14 | Pass; `one-free-schedule` |
-| Sociobot opens checkout and verifies a pasted license token. | 9 | Pass; `one-free-schedule` |
+| Sociobot opens checkout and verifies returned or pasted license tokens. | 10 | Pass; `one-free-schedule` |
 | If a license becomes inactive, its schedule library closes. | 9 | Pass; `license-revocation` |
 | One free schedule and exports remain available. | 7 | Pass; `license-revocation` |
 | Schedule data stays in the browser. | 6 | Pass; `local-schedules` |
@@ -100,6 +100,7 @@ Tokenizer: split each trimmed visible sentence, heading, and control label on wh
 | The Terms page includes a 14-day refund request email link. | 10 | Pass; `refund-request` |
 | Open `http://localhost:5173`. | 2 | Pass for developers |
 | The demo entry point is `http://localhost:5173/?demo=1`. | 6 | Pass for developers |
+| Calendar downloads use `.ics`; backup files use JSON. | 8 | Pass for developers |
 | `npm test` builds, serves, and checks the app in Chromium. | 9 | Pass for developers |
 | Deploy `dist/` to Azure Static Web Apps. | 7 | Pass for developers |
 

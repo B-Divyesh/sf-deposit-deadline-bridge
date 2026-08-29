@@ -85,7 +85,7 @@
   },
   {
     "id": "json-backup",
-    "claim": "Exports and imports a JSON backup.",
+    "claim": "Downloads a backup file and restores a schedule from one.",
     "where": "workspace actions, README",
     "test": "npm test -- --grep @claim:json-backup",
     "sandbox": "fresh /demo sample; export the JSON, change its project name, import it, and assert the changed data appears"
@@ -99,14 +99,14 @@
   },
   {
     "id": "one-free-schedule",
-    "claim": "Sociobot opens checkout and verifies a pasted license token. One schedule is free; $24 unlocks a library for multiple schedules in this browser.",
+    "claim": "Sociobot opens checkout and verifies returned or pasted license tokens. One schedule is free; $24 unlocks a library for multiple schedules in this browser.",
     "where": "landing facts, pricing, workspace license panel, README paid-license sentence",
     "test": "npm test -- --grep @claim:one-free-schedule",
-    "sandbox": "fresh context; assert price and checkout URL, verify a mocked valid license, and prove the paid library saves and reopens three records while free mode retains one"
+    "sandbox": "fresh contexts; assert the price and checkout URL, then prove invalid-online and unverified-offline return tokens retain one record while mocked valid returned and pasted tokens save and reopen three records"
   },
   {
     "id": "free-core-features",
-    "claim": "Calendar exports, payment instructions, reminder review, and JSON backups stay free.",
+    "claim": "Calendar exports, payment instructions, reminder review, and backup files stay free.",
     "where": "workspace license panel, Terms",
     "test": "npm test -- --grep @claim:free-core-features",
     "sandbox": "fresh unlicensed real workspace; fill a valid schedule and assert calendar/instruction downloads, clipboard copy, reminder review, and JSON backup all work"
