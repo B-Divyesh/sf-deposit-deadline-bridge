@@ -26,6 +26,8 @@ test('SPA route navigation updates the title and restores heading focus', async 
 
 test('reviewed labels name the product result instead of using a slogan or metaphor', async ({ page }) => {
   await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Keep deposit and final balance dates' })).toBeVisible();
+  await expect(page.getByText('For event, catering, and project businesses whose agreed payment dates disappear when a quote becomes an invoice.')).toBeVisible();
   await expect(page.getByText('Payment schedule preview', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Keep multiple payment schedules' })).toBeVisible();
 
