@@ -28,8 +28,11 @@ test('reviewed labels name the product result instead of using a slogan or metap
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Keep deposit and final balance dates' })).toBeVisible();
   await expect(page.getByText('For event, catering, and project businesses whose agreed payment dates disappear when a quote becomes an invoice.')).toBeVisible();
-  await expect(page.getByText('Payment schedule preview', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Payment schedule preview' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'How to record and export payment dates' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'What this app records and does not handle' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Keep multiple payment schedules' })).toBeVisible();
+  await expect(page.locator('main')).not.toContainText(/Two dates stay separate|Move both dates without retyping|It keeps dates, not money/);
 
   await page.goto('/workspace');
   await expect(page.getByText('Export options', { exact: true })).toBeVisible();

@@ -15,20 +15,18 @@ Tokenizer: split each trimmed visible sentence, heading, and control label on wh
 | Your schedules stay in this browser. | 6 | Pass; `local-schedules` |
 | One schedule is free. The full library costs $24 once. | 10 | Pass; `one-free-schedule` |
 | Create a blank schedule | 4 | Pass |
-| Payment schedule preview | 3 | Pass |
-| Two dates stay separate | 4 | Pass |
+| Payment schedule preview | 3 | Pass; literal h2 |
 | Download two plain payment instructions to attach to an invoice. | 10 | Pass; `two-payment-export` |
 | Add both deadlines to your calendar without typing them again. | 10 | Pass; `calendar-two-events` |
 | How it works | 3 | Pass |
-| Move both dates without retyping | 5 | Pass |
+| How to record and export payment dates | 7 | Pass; literal h2 |
 | Record the agreement | 3 | Pass |
 | Add the deposit, final balance, local times, and exact time zone. | 11 | Pass |
 | Export both payment deadlines | 4 | Pass |
 | Download one calendar file and two plain payment instructions. | 9 | Pass; `calendar-two-events`, `two-payment-export` |
 | Review each reminder | 3 | Pass |
 | Check the email draft before your own email app opens it. | 11 | Pass; `confirm-reminder` |
-| What the app does not do | 6 | Pass |
-| It keeps dates, not money | 5 | Pass |
+| What this app records and does not handle | 8 | Pass; literal h2 |
 | No automatic email sending. | 4 | Pass; `confirm-reminder` |
 | No late fees or local rules added for you. | 9 | Pass; `no-added-rules` |
 | License checks never include schedule details. | 6 | Pass; `license-private` |

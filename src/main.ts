@@ -6,7 +6,7 @@ import { cachedLicenseIsValid, captureLicense, checkoutUrl, removeLicense, store
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-const BUILD_ID = 'v1.0.5';
+const BUILD_ID = 'v1.0.6';
 captureLicense();
 let premium = cachedLicenseIsValid();
 let schedule = blankSchedule();
@@ -113,8 +113,7 @@ function landingPage(): string {
 
       <section class="live-preview" aria-labelledby="preview-title">
         <div class="section-heading">
-          <p class="eyebrow">Payment schedule preview</p>
-          <h2 id="preview-title">Two dates stay separate</h2>
+          <h2 id="preview-title">Payment schedule preview</h2>
           <p>Download two plain payment instructions to attach to an invoice. Add both deadlines to your calendar without typing them again.</p>
         </div>
         <div class="preview-sheet" aria-label="Sample payment schedule preview">
@@ -142,7 +141,7 @@ function landingPage(): string {
       </section>
 
       <section class="steps" aria-labelledby="steps-title">
-        <div class="section-heading"><p class="eyebrow">How it works</p><h2 id="steps-title">Move both dates without retyping</h2></div>
+        <div class="section-heading"><p class="eyebrow">How it works</p><h2 id="steps-title">How to record and export payment dates</h2></div>
         <ol>
           <li><span>01</span><div><h3>Record the agreement</h3><p>Add the deposit, final balance, local times, and exact time zone.</p></div></li>
           <li><span>02</span><div><h3>Export both payment deadlines</h3><p>Download one calendar file and two plain payment instructions.</p></div></li>
@@ -151,7 +150,7 @@ function landingPage(): string {
       </section>
 
       <section class="boundaries" aria-labelledby="boundaries-title">
-        <div><p class="eyebrow">What the app does not do</p><h2 id="boundaries-title">It keeps dates, not money</h2></div>
+        <div><h2 id="boundaries-title">What this app records and does not handle</h2></div>
         <ul>
           <li>No automatic email sending.</li>
           <li>No late fees or local rules added for you.</li>
