@@ -1,34 +1,29 @@
-# Deposit Deadline Bridge — polish 6 handoff
+# Deposit Deadline Bridge — verification 5 handoff
 
-## Result: **PASS**
+## Result: **FAIL — release blocked**
 
-Repair commit: `b8e7446b7e2e1a348d4c51800c667d660e65dc0a`; static deployment: `c9eb2842-6b84-4874-9cdf-d986c24e69aa`; live: <https://deposit-deadline-bridge.sociobot.in>
+Independent QA tested commit `688261db371c19a48ccedefdcd279ebe4ef6274e` against <https://deposit-deadline-bridge.sociobot.in> on 2026-08-29. The live artifacts byte-match the candidate and all functional, claim, privacy, accessibility, offline, and billing checks pass. Release is blocked by F-5-1: content-hashed PWA assets are deployed with only `Cache-Control: public, max-age=3600`, not long-lived immutable caching as required.
 
-The final blocking regression (F-6-1 / F-1-12) is closed. `.factory/copy-audit.md` is generated from one source of truth with a correct whitespace tokenizer. Its Playwright regression test verifies every row and count against the rendered landing and README, so the evidence cannot silently go stale. The catalog description is now the verb-first, 65-character “Keep deposit and final balance dates when quotes become invoices.”
+## Verification summary
 
-## What ships
+- `npm ci`; all 20 exact `.factory/claims.json` commands separately; `npm run test:unit` (3/3); `npm test` (37/37); `npm run build`; and `npm audit --audit-level=moderate` all pass.
+- The demo works in one click at `/?demo=1`, is isolated, exports the two deadlines, validates bad dates/DST, and reloads offline after first visit.
+- Live browser checks passed on desktop and 390 px mobile. Axe found zero serious/critical issues across home, demo, workspace, Privacy, Terms, and 404. Normal routes had no console/page errors.
+- Live request logging found only same-origin requests during the demo. The license endpoint allowed 30 concurrent invalid checks, then correctly returned 429 plus `Retry-After: 4`.
+- JS/CSS gzip sizes are 12.37 kB / 4.91 kB. `npm run test:live` passes after rate-limit recovery.
 
-- Local-first payment-schedule workspace with deposit and final-balance milestones, timezone/DST validation, calendar and instruction exports, reminder review, and backup/restore.
-- One-click isolated `?demo=1` sample with HT-084, persistent warning, Reset demo, and Start for real.
-- Route-specific metadata, focused route changes, shared legal/navigation shell, designed HTTP 404, offline PWA behavior, and the existing ceramic-ledger visual system.
-- Generated claims/copy evidence and all earlier review repairs preserved. See `.factory/polish-6.md` for the finding-by-finding map.
+## Required next step
 
-## Run and verify
+Change the Static Web Apps policy for versioned hashed assets to a long immutable lifetime (for example `public, max-age=31536000, immutable`), keeping `sw.js` as `no-cache`; deploy; then confirm the exact production headers. See [verification-5.md](verification-5.md) for full evidence and the precise finding.
+
+## Run
 
 ```bash
 npm ci
-npm run dev
-npm test
 npm run test:unit
+npm test
 npm run build
+npm run test:live
 ```
 
-Demo: `http://localhost:5173/?demo=1`. Production verification: `npm run test:live`.
-
-Exact clean-clone evidence is in `.factory/evidence/polish-6/clean-verification.log`: all 20 declared claim commands passed separately, then unit tests (3/3), the full Playwright suite (37/37), build, and moderate audit (zero vulnerabilities). The bundled output is 12.37 kB gzip JavaScript and 4.91 kB gzip CSS.
-
-Local `verify-url.sh` evidence and screenshots are under `.factory/evidence/polish-6/local/`; live screenshots and the six-route cold/axe result are under `.factory/evidence/polish-6/live/` (ignored evidence artifacts). Local Lighthouse recorded performance 97, accessibility 100, best practices 100, SEO 100; LCP 1.25 s, CLS 0, TBT 200 ms.
-
-## Known gaps
-
-None. The product remains a static PWA deployment; deployment, DNS, and billing infrastructure are factory-managed.
+Demo: `http://localhost:5173/?demo=1`.
