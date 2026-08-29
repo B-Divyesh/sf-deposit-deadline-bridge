@@ -6,7 +6,7 @@ import { cachedLicenseIsValid, captureLicense, checkoutUrl, removeLicense, store
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-const BUILD_ID = 'v1.0.7';
+const BUILD_ID = 'v1.0.8';
 const hasReturnedLicense = captureLicense();
 let premium = cachedLicenseIsValid();
 let schedule = blankSchedule();
@@ -313,7 +313,7 @@ function legalPage(kind: 'privacy' | 'terms'): string {
   return shell(`<main id="main" class="legal-page">
     <p class="eyebrow">Deposit Deadline Bridge</p>
     <h1 tabindex="-1">${privacy ? 'How your schedules are stored' : 'Terms for Deposit Deadline Bridge'}</h1>
-    <p class="legal-lede">${privacy ? 'This page explains what is stored and when a network request happens.' : 'These terms keep a small local utility clear and fair.'}</p>
+    <p class="legal-lede">${privacy ? 'This page explains what is stored and when a network request happens.' : 'These terms cover use, the one-time license, refunds, and availability.'}</p>
     ${privacy ? `
       <section><h2>Schedule data</h2><p>Real schedules are stored in this browser. Demo changes stay in memory and disappear when you leave or reset the demo.</p><p>The app does not send quote, client, payment, or date details to a server. Backup files are created only when you request them.</p></section>
       <section><h2>License data</h2><p>If you buy or restore a license, this browser stores the license token and its latest verification result. The app sends only that token to the Sociobot license service.</p></section>

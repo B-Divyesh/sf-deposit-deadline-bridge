@@ -117,7 +117,7 @@ export const auditSections = [
   },
 ];
 
-export const catalogEntry = 'Keep deposit and final balance dates when quotes become invoices.';
+export const catalogEntry = 'Keep deposit and final balance dates intact when quotes become invoices.';
 
 export function wordCount(copy) {
   return copy.trim().split(/\s+/).filter(Boolean).length;

@@ -85,10 +85,17 @@
   },
   {
     "id": "json-backup",
-    "claim": "Downloads a backup file and restores a schedule from one.",
-    "where": "workspace actions, README",
+    "claim": "Backup files are created only when you request them. Downloads a backup file and restores a schedule from one.",
+    "where": "Privacy Schedule data, workspace actions, README",
     "test": "npm test -- --grep @claim:json-backup",
-    "sandbox": "fresh /demo sample; download the backup, change its project name, restore it, and assert the changed data appears"
+    "sandbox": "fresh /demo entry; enter the real workspace, edit and save a schedule, record all download events through calendar and instruction exports, assert no backup exists until Download backup is selected, then assert exactly one backup and restore its changed schedule"
+  },
+  {
+    "id": "404-storage-safety",
+    "claim": "Your saved schedules have not changed.",
+    "where": "designed 404 page",
+    "test": "npm test -- --grep @claim:404-storage-safety",
+    "sandbox": "fresh browser context; save a real schedule and seed the two namespaced license values, snapshot IndexedDB and localStorage, open the static HTTP 404, return through its Workspace link, and assert both snapshots are byte-for-byte unchanged"
   },
   {
     "id": "schedule-settings",

@@ -1,1 +1,1 @@
-Keep deposit and final balance dates when quotes become invoices.
+Keep deposit and final balance dates intact when quotes become invoices.

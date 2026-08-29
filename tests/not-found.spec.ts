@@ -41,3 +41,26 @@ test('designed 404 contains no inline style that the production CSP would block'
   expect(notFoundHtml).not.toMatch(/<style[\s>]/i);
   expect(notFoundHtml).toMatch(/<link rel="stylesheet" href="\/404\.css" \/>/);
 });
+
+test('designed 404 mobile actions meet the 44 pixel target baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const notFoundHtml = await readFile(join(process.cwd(), 'public/404.html'), 'utf8');
+  await page.route('**/mobile-target-missing', (route) => route.fulfill({
+    status: 404,
+    contentType: 'text/html',
+    body: notFoundHtml,
+  }));
+  await page.goto('/mobile-target-missing');
+  const skipLink = page.getByRole('link', { name: 'Skip to main content' });
+  await skipLink.focus();
+  await expect(skipLink).toBeFocused();
+  const targets = await page.locator('a[href]').evaluateAll((elements) => elements.map((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      label: (element.getAttribute('aria-label') || element.textContent || '').trim().replace(/\s+/g, ' '),
+      width: rect.width,
+      height: rect.height,
+    };
+  }));
+  expect(targets.filter((target) => target.width < 44 || target.height < 44), JSON.stringify(targets)).toEqual([]);
+});

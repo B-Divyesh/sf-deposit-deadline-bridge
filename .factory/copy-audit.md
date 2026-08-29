@@ -120,7 +120,7 @@ Source: README.md rendered as Markdown.
 
 | Copy | Words | Result |
 | --- | ---: | --- |
-| Keep deposit and final balance dates when quotes become invoices. | 10 | Pass; verb-first and under 120 characters |
+| Keep deposit and final balance dates intact when quotes become invoices. | 11 | Pass; verb-first and under 120 characters |
 
 ## Terminology table
 

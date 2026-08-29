@@ -258,14 +258,43 @@ test('@claim:demo-isolation leaves real storage byte-for-byte unchanged', async 
 });
 
 test('@claim:json-backup downloads and restores a schedule backup', async ({ page }) => {
+  const downloadNames: string[] = [];
+  page.on('download', (download) => downloadNames.push(download.suggestedFilename()));
   await page.goto('/demo');
+  expect(downloadNames).toEqual([]);
+  await page.locator('#projectName').fill('Backup timing dinner');
+  expect(downloadNames).toEqual([]);
+  await page.getByRole('link', { name: 'Start for real' }).click();
+  await page.locator('#quoteNumber').fill('BACKUP-17');
+  await page.locator('#projectName').fill('Backup timing dinner');
+  await page.locator('#clientName').fill('Nadia Rao');
+  await page.locator('#depositAmount').fill('900');
+  await page.locator('#depositDue').fill('2026-09-14T12:00');
+  await page.locator('#balanceAmount').fill('2100');
+  await page.locator('#balanceDue').fill('2026-10-14T12:00');
+  await page.locator('#paymentMethod').fill('Bank transfer');
+  await page.locator('#paymentReference').fill('BACKUP-17');
+  await page.getByRole('button', { name: 'Save schedule' }).click();
+  await expect(page.locator('#save-state')).toHaveText('Saved in this browser.');
+  expect(downloadNames).toEqual([]);
+
+  const calendarDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download calendar' }).click();
+  await calendarDownload;
+  const instructionsDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download payment instructions' }).click();
+  await instructionsDownload;
+  expect(downloadNames).toHaveLength(2);
+  expect(downloadNames.filter((name) => name.endsWith('.json'))).toEqual([]);
+
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download backup' }).click();
   const item = await downloadPromise;
+  expect(downloadNames.filter((name) => name.endsWith('.json'))).toEqual(['backup-17-deadline-bridge.json']);
   const path = join(tmpdir(), `backup-${Date.now()}.json`);
   await item.saveAs(path);
   const backup = JSON.parse(await readFile(path, 'utf8'));
-  expect(backup.schedule.quoteNumber).toBe('HT-084');
+  expect(backup.schedule.quoteNumber).toBe('BACKUP-17');
   backup.schedule.projectName = 'Imported winter supper';
   await page.locator('#import-backup').setInputFiles({
     name: 'edited-backup.json',
@@ -273,6 +302,53 @@ test('@claim:json-backup downloads and restores a schedule backup', async ({ pag
     buffer: Buffer.from(JSON.stringify(backup)),
   });
   await expect(page.locator('#projectName')).toHaveValue('Imported winter supper');
+});
+
+test('@claim:404-storage-safety leaves schedules and license state byte-for-byte unchanged', async ({ browser }) => {
+  const context = await browser.newContext({
+    baseURL: 'http://127.0.0.1:4173',
+    serviceWorkers: 'block',
+  });
+  const page = await context.newPage();
+  try {
+    await page.goto('/demo');
+    await page.getByRole('link', { name: 'Start for real' }).click();
+    await expect(page).toHaveURL(/\/workspace$/);
+    await page.locator('#quoteNumber').fill('SAFE-404');
+    await page.locator('#projectName').fill('Winter gallery opening');
+    await page.locator('#clientName').fill('Elena Park');
+    await page.locator('#depositAmount').fill('1400');
+    await page.locator('#depositDue').fill('2026-09-09T12:00');
+    await page.locator('#balanceAmount').fill('3600');
+    await page.locator('#balanceDue').fill('2026-10-09T12:00');
+    await page.locator('#paymentMethod').fill('Bank transfer');
+    await page.locator('#paymentReference').fill('SAFE-404');
+    await page.getByRole('button', { name: 'Save schedule' }).click();
+    await expect(page.locator('#save-state')).toHaveText('Saved in this browser.');
+    await page.evaluate(() => {
+      localStorage.setItem('sb_license:deposit-deadline-bridge', 'storage-safety-token');
+      localStorage.setItem('sb_license_verdict:deposit-deadline-bridge', JSON.stringify({ valid: false, checkedAt: Date.now() }));
+    });
+
+    const beforeSchedules = JSON.stringify(await savedSchedules(page));
+    const beforeLicenseState = await page.evaluate(() => JSON.stringify(Object.entries(localStorage).sort(([left], [right]) => left.localeCompare(right))));
+    const notFoundHtml = await readFile(join(process.cwd(), 'public/404.html'), 'utf8');
+    await page.route('**/claim-storage-missing', (route) => route.fulfill({ status: 404, contentType: 'text/html', body: notFoundHtml }));
+
+    const response = await page.goto('/claim-storage-missing');
+    expect(response?.status()).toBe(404);
+    await expect(page.getByText('Your saved schedules have not changed.')).toBeVisible();
+    expect(JSON.stringify(await savedSchedules(page))).toBe(beforeSchedules);
+    expect(await page.evaluate(() => JSON.stringify(Object.entries(localStorage).sort(([left], [right]) => left.localeCompare(right))))).toBe(beforeLicenseState);
+
+    await page.getByRole('link', { name: 'Workspace' }).click();
+    await expect(page).toHaveURL(/\/workspace$/);
+    await expect(page.locator('#quoteNumber')).toHaveValue('SAFE-404');
+    await expect.poll(async () => JSON.stringify(await savedSchedules(page))).toBe(beforeSchedules);
+    await expect.poll(() => page.evaluate(() => JSON.stringify(Object.entries(localStorage).sort(([left], [right]) => left.localeCompare(right))))).toBe(beforeLicenseState);
+  } finally {
+    await context.close();
+  }
 });
 
 test('@claim:schedule-settings carries chosen locale, currency, time zone, wording, and reminder timing into exports', async ({ page }) => {

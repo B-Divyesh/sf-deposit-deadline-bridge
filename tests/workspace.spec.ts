@@ -42,6 +42,8 @@ test('reviewed labels name the product result instead of using a slogan or metap
   await expect(page.getByRole('heading', { level: 1, name: 'How your schedules are stored' })).toBeVisible();
   await page.goto('/terms');
   await expect(page.getByRole('heading', { level: 1, name: 'Terms for Deposit Deadline Bridge' })).toBeVisible();
+  await expect(page.getByText('These terms cover use, the one-time license, refunds, and availability.')).toBeVisible();
+  await expect(page.locator('main')).not.toContainText('clear and fair');
   await expect(page.locator('main')).not.toContainText(/Dodo|merchant of record|handle payment and refunds/i);
 
   await page.goto('/missing-page');
