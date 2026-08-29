@@ -2,7 +2,7 @@
 
 ## Result: PASS
 
-Perfection-loop round 7 closes every finding in `.factory/review-7.md` and preserves every repair from reviews 1–6. Product repair commit `741ec3f27d7c3b842233589b8197caca70afbd08` is pushed to `main`. Azure Static Web Apps deployment `9fa1d816-2ada-441f-9af6-62ceec48e3c3` is live at <https://deposit-deadline-bridge.sociobot.in>.
+Perfection-loop round 7 closes every finding in `.factory/review-7.md` and preserves every repair from reviews 1–6. Product repair commit `741ec3f27d7c3b842233589b8197caca70afbd08` and verification record `bf40b8d674d8acabec502ff7f43ffbc144b6e0c4` are ready on `main`. Azure Static Web Apps deployment `9fa1d816-2ada-441f-9af6-62ceec48e3c3` is live at <https://deposit-deadline-bridge.sociobot.in>.
 
 ## What changed
 
@@ -16,7 +16,7 @@ Perfection-loop round 7 closes every finding in `.factory/review-7.md` and prese
 
 ## Verification
 
-- Clean clone: `/tmp/ddb-polish7-clean-FGRY4d/repo`; `npm ci` passed with zero vulnerabilities.
+- Final clean clone: `/tmp/ddb-polish7-final-W8PLGv/repo` at `bf40b8d`; `npm ci` passed with zero vulnerabilities.
 - All 21 exact commands in `.factory/claims.json` passed separately. Each claim tag occurs exactly once.
 - `npm run test:unit`: 3/3 passed.
 - `npm test`: 39/39 passed, including browser integration, keyboard, mobile, Axe, privacy, demo isolation, 404, and offline checks.

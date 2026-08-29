@@ -3,12 +3,13 @@
 Reviewed candidate: `38b1f379388dbc76b011f96cca51e1d6555c3dda`  
 Review commit: `b9a7f62737ce25ed7348fdbeb25ddc3b2d257428`  
 Product repair commit: `741ec3f27d7c3b842233589b8197caca70afbd08`  
+Verification record commit: `bf40b8d674d8acabec502ff7f43ffbc144b6e0c4`
 Deployment: `9fa1d816-2ada-441f-9af6-62ceec48e3c3`  
 Live site: <https://deposit-deadline-bridge.sociobot.in>
 
 ## Evidence key
 
-- **C1** — clean clone `/tmp/ddb-polish7-clean-FGRY4d/repo`: all 21 claim commands passed separately; unit 3/3; Playwright 39/39; copy audit, build, and dependency audit passed.
+- **C1** — clean clone `/tmp/ddb-polish7-final-W8PLGv/repo` at `bf40b8d`: all 21 claim commands passed separately; unit 3/3; Playwright 39/39; copy audit, build, and dependency audit passed.
 - **H** — `.factory/evidence/polish-7/live/mobile-first-screen.png`.
 - **D** — `.factory/evidence/polish-7/live/mobile-demo-sticky.png`.
 - **P** — `.factory/evidence/polish-7/live-privacy/screenshot-mobile.png`.
