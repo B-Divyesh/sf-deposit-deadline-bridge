@@ -103,5 +103,40 @@
     "where": "landing facts, pricing, workspace license panel, README paid-license sentence",
     "test": "npm test -- --grep @claim:one-free-schedule",
     "sandbox": "fresh context; assert price and checkout URL, verify a mocked valid license, and prove the paid library saves and reopens three records while free mode retains one"
+  },
+  {
+    "id": "free-core-features",
+    "claim": "Calendar exports, payment instructions, reminder review, and JSON backups stay free.",
+    "where": "workspace license panel, Terms",
+    "test": "npm test -- --grep @claim:free-core-features",
+    "sandbox": "fresh unlicensed real workspace; fill a valid schedule and assert calendar/instruction downloads, clipboard copy, reminder review, and JSON backup all work"
+  },
+  {
+    "id": "license-local-storage",
+    "claim": "This browser stores the license token and its latest verification result.",
+    "where": "Privacy, README",
+    "test": "npm test -- --grep @claim:license-local-storage",
+    "sandbox": "fresh workspace with a mocked valid license; verify it and assert localStorage contains only the two documented namespaced license values"
+  },
+  {
+    "id": "data-deletion",
+    "claim": "Remove license clears only license data. Clearing this site's browser data clears schedules and license data.",
+    "where": "Privacy, workspace license panel, README",
+    "test": "npm test -- --grep @claim:data-deletion",
+    "sandbox": "fresh real workspace; seed a schedule and valid mocked license, remove the license, then clear origin data through the browser storage protocol and assert all local values are gone"
+  },
+  {
+    "id": "license-revocation",
+    "claim": "When a license check reports an inactive license, the paid library closes. One free schedule and exports remain available.",
+    "where": "Terms, workspace license notice, README",
+    "test": "npm test -- --grep @claim:license-revocation",
+    "sandbox": "fresh workspace; mock a valid then revoked license result, force a stale verdict reload, and assert the paid library closes while free exports remain visible"
+  },
+  {
+    "id": "refund-request",
+    "claim": "Opens a pre-addressed refund request email.",
+    "where": "Terms refund policy, README",
+    "test": "npm test -- --grep @claim:refund-request",
+    "sandbox": "fresh Terms route; assert the 14-day policy text and capture the refund link activation as the expected editable support mailto URL"
   }
 ]

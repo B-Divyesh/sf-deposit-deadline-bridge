@@ -23,3 +23,22 @@ test('SPA route navigation updates the title and restores heading focus', async 
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
 });
+
+test('reviewed labels name the product result instead of using a slogan or metaphor', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText('Payment schedule preview', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Keep multiple payment schedules' })).toBeVisible();
+
+  await page.goto('/workspace');
+  await expect(page.getByText('Export options', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Save multiple schedules for $24 once' })).toBeVisible();
+
+  await page.goto('/privacy');
+  await expect(page.getByRole('heading', { level: 1, name: 'How your schedules are stored' })).toBeVisible();
+  await page.goto('/terms');
+  await expect(page.getByRole('heading', { level: 1, name: 'Terms for Deposit Deadline Bridge' })).toBeVisible();
+  await expect(page.locator('main')).not.toContainText(/Dodo|merchant of record|handle payment and refunds/i);
+
+  await page.goto('/missing-page');
+  await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
+});

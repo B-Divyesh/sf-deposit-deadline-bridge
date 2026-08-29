@@ -312,6 +312,7 @@ test('@claim:schedule-settings carries chosen locale, currency, time zone, wordi
 test('@claim:one-free-schedule uses Sociobot checkout and license verification for a $24 multiple-schedule library', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('One schedule is free. The full library costs $24 once.')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Keep multiple payment schedules' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Buy the full library/ }).first()).toHaveAttribute('href', 'https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/checkout');
 
   await page.goto('/workspace');
@@ -362,4 +363,141 @@ test('@claim:one-free-schedule uses Sociobot checkout and license verification f
   await page.locator('#quoteNumber').fill('Q-4');
   await page.getByRole('button', { name: 'Save schedule' }).click();
   await expect(page.locator('.saved-library .saved-item')).toHaveCount(3);
+});
+
+test('@claim:free-core-features keeps calendar, instructions, reminder review, and JSON backups free', async ({ page }) => {
+  await page.goto('/workspace');
+  await expect(page.getByText('Calendar, instructions, reminder review, and JSON backups stay free.')).toBeVisible();
+  await page.locator('#quoteNumber').fill('FREE-17');
+  await page.locator('#projectName').fill('Free core dinner');
+  await page.locator('#clientName').fill('Ravi Shah');
+  await page.locator('#clientEmail').fill('ravi@example.test');
+  await page.locator('#depositAmount').fill('1200');
+  await page.locator('#depositDue').fill('2026-09-10T12:00');
+  await page.locator('#balanceAmount').fill('2800');
+  await page.locator('#balanceDue').fill('2026-10-10T12:00');
+  await page.locator('#paymentMethod').fill('Bank transfer');
+  await page.locator('#paymentReference').fill('FREE-17');
+
+  const calendarDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download calendar' }).click();
+  expect((await calendarDownload).suggestedFilename()).toBe('free-17-deadlines.ics');
+
+  const instructionDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download payment instructions' }).click();
+  expect((await instructionDownload).suggestedFilename()).toBe('free-17-payment-instructions.txt');
+
+  await page.evaluate(() => {
+    Reflect.defineProperty(navigator.clipboard, 'writeText', {
+      configurable: true,
+      value: async (text: string) => { document.documentElement.dataset.freeCopy = text; },
+    });
+  });
+  await page.getByRole('button', { name: 'Copy payment instructions' }).click();
+  await expect(page.locator('#toast')).toHaveText('Two payment instructions copied.');
+  await expect(page.locator('html')).toHaveAttribute('data-free-copy', /PAYMENT 1 — DEPOSIT/);
+
+  await page.getByRole('button', { name: 'Review deposit email' }).click();
+  await expect(page.getByRole('dialog', { name: 'Review reminder email' })).toBeVisible();
+  await page.getByRole('button', { name: 'Keep editing' }).click();
+
+  const backupDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export JSON backup' }).click();
+  expect((await backupDownload).suggestedFilename()).toBe('free-17-deadline-bridge.json');
+});
+
+test('@claim:license-local-storage stores only the documented license values in this browser', async ({ page }) => {
+  await page.route('https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/verify?license=stored-license', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ valid: true, reason: 'ok', expires_at: null }),
+  }));
+  await page.goto('/workspace');
+  await page.getByRole('button', { name: 'Paste a license' }).click();
+  await page.getByLabel('License token').fill('stored-license');
+  await page.getByRole('button', { name: 'Verify license' }).click();
+  await expect(page.getByText('Full library active')).toBeVisible();
+  const storage = await page.evaluate(() => Object.fromEntries(Object.entries(localStorage)));
+  expect(Object.keys(storage).sort()).toEqual([
+    'sb_license:deposit-deadline-bridge',
+    'sb_license_verdict:deposit-deadline-bridge',
+  ]);
+  expect(storage['sb_license:deposit-deadline-bridge']).toBe('stored-license');
+  expect(JSON.parse(storage['sb_license_verdict:deposit-deadline-bridge'])).toMatchObject({ valid: true });
+});
+
+test('@claim:data-deletion removes license values separately and clears all local data with browser site-data removal', async ({ page, context }) => {
+  await page.route('https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/verify?license=remove-license', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ valid: true, reason: 'ok', expires_at: null }),
+  }));
+  await page.goto('/workspace');
+  await page.locator('#quoteNumber').fill('DELETE-17');
+  await page.locator('#projectName').fill('Delete test dinner');
+  await page.locator('#clientName').fill('Alex Kim');
+  await page.locator('#depositAmount').fill('1200');
+  await page.locator('#depositDue').fill('2026-09-10T12:00');
+  await page.locator('#balanceAmount').fill('2800');
+  await page.locator('#balanceDue').fill('2026-10-10T12:00');
+  await page.locator('#paymentMethod').fill('Bank transfer');
+  await page.locator('#paymentReference').fill('DELETE-17');
+  await page.getByRole('button', { name: 'Save schedule' }).click();
+  await expect(page.locator('#save-state')).toHaveText('Saved in this browser.');
+
+  await page.getByRole('button', { name: 'Paste a license' }).click();
+  await page.getByLabel('License token').fill('remove-license');
+  await page.getByRole('button', { name: 'Verify license' }).click();
+  await expect(page.getByText('Full library active')).toBeVisible();
+  await page.getByRole('button', { name: 'Remove license' }).click();
+  await expect(page.getByRole('heading', { level: 2, name: 'Save multiple schedules for $24 once' })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('sb_license:deposit-deadline-bridge'))).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem('sb_license_verdict:deposit-deadline-bridge'))).toBeNull();
+  expect(await savedSchedules(page)).toHaveLength(1);
+
+  const client = await context.newCDPSession(page);
+  await client.send('Storage.clearDataForOrigin', { origin: new URL(page.url()).origin, storageTypes: 'all' });
+  expect(await page.evaluate(() => Object.keys(localStorage))).toEqual([]);
+  expect(await savedSchedules(page)).toEqual([]);
+});
+
+test('@claim:license-revocation closes the paid library while free work remains available', async ({ page }) => {
+  let verificationCount = 0;
+  await page.route('https://api.sociobot.in/api/v1/products/deposit-deadline-bridge/verify?license=revoked-license', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ valid: verificationCount++ === 0, reason: verificationCount === 1 ? 'ok' : 'revoked', expires_at: null }),
+  }));
+  await page.goto('/workspace');
+  await page.getByRole('button', { name: 'Paste a license' }).click();
+  await page.getByLabel('License token').fill('revoked-license');
+  await page.getByRole('button', { name: 'Verify license' }).click();
+  await expect(page.getByText('Full library active')).toBeVisible();
+  await page.evaluate(() => {
+    localStorage.setItem('sb_license_verdict:deposit-deadline-bridge', JSON.stringify({ valid: true, checkedAt: 0 }));
+  });
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 2, name: 'Save multiple schedules for $24 once' })).toBeVisible();
+  await expect(page.getByText('License no longer active. The free schedule and exports still work.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Download calendar' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Download payment instructions' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Export JSON backup' })).toBeVisible();
+});
+
+test('@claim:refund-request opens a pre-addressed refund request email', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.addEventListener('click', (event) => {
+      const target = event.target;
+      if (target instanceof HTMLAnchorElement && target.protocol === 'mailto:') {
+        event.preventDefault();
+        document.documentElement.dataset.refundMailto = target.href;
+      }
+    }, true);
+  });
+  await page.goto('/terms');
+  await expect(page.getByText('You can ask for a refund within 14 days of purchase.')).toBeVisible();
+  const request = page.getByRole('link', { name: 'Request a refund by email' });
+  await expect(request).toHaveAttribute('href', 'mailto:support@sociobot.in?subject=Deposit%20Deadline%20Bridge%20refund%20request');
+  await request.click();
+  await expect.poll(() => page.locator('html').getAttribute('data-refund-mailto')).toContain('mailto:support@sociobot.in?subject=Deposit%20Deadline%20Bridge%20refund%20request');
 });

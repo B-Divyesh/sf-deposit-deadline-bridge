@@ -23,7 +23,7 @@ test('designed 404 loads its same-origin stylesheet under the production CSP', a
   const response = await page.goto('/missing-page');
   expect(response?.status()).toBe(404);
   expect((await stylesheetResponse).status()).toBe(200);
-  await expect(page.getByRole('heading', { level: 1, name: 'This bridge ends here' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
   await expect(page.locator('link[rel="stylesheet"]')).toHaveAttribute('href', '/404.css');
   await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeAttached();
   await expect(page.getByRole('banner').getByRole('link', { name: 'Deposit Deadline Bridge home' })).toBeVisible();

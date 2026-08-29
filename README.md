@@ -27,13 +27,17 @@ The sample is quote HT-084 for the Highland Glasshouse Supper. Demo changes are 
 
 The $24 one-time license lets you save and reopen multiple schedules in this browser. Sociobot opens checkout and verifies a pasted license token.
 
+If a license becomes inactive, its schedule library closes. One free schedule and exports remain available.
+
 ## Privacy and scope
 
 Schedule data stays in the browser. The app has no analytics, advertising scripts, remote fonts, or automatic email sending. A license check sends only the saved license token to `api.sociobot.in`.
 
+The browser stores a restored license token and its latest verification result. Remove license clears those values without removing a schedule. Clearing this site’s browser data clears both.
+
 Choose the locale, currency, and time zone. Set your payment wording and reminder timing. The app does not invent late fees or local invoice rules.
 
-See [`/privacy`](https://deposit-deadline-bridge.sociobot.in/privacy) and [`/terms`](https://deposit-deadline-bridge.sociobot.in/terms).
+See [`/privacy`](https://deposit-deadline-bridge.sociobot.in/privacy) and [`/terms`](https://deposit-deadline-bridge.sociobot.in/terms). The Terms page includes a 14-day refund request email link.
 
 ## Develop
 

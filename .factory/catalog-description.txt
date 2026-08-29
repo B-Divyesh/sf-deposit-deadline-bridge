@@ -1,1 +1,1 @@
-Keep deposit and final balance dates intact when a quote becomes an invoice.
+Keep two payment deadlines when a quote becomes an invoice.

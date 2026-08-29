@@ -6,7 +6,7 @@ import { cachedLicenseIsValid, captureLicense, checkoutUrl, removeLicense, store
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-const BUILD_ID = 'v1.0.4';
+const BUILD_ID = 'v1.0.5';
 captureLicense();
 let premium = cachedLicenseIsValid();
 let schedule = blankSchedule();
@@ -113,7 +113,7 @@ function landingPage(): string {
 
       <section class="live-preview" aria-labelledby="preview-title">
         <div class="section-heading">
-          <p class="eyebrow">The attachment your invoice lacks</p>
+          <p class="eyebrow">Payment schedule preview</p>
           <h2 id="preview-title">Two dates stay separate</h2>
           <p>Download two plain payment instructions to attach to an invoice. Add both deadlines to your calendar without typing them again.</p>
         </div>
@@ -162,13 +162,13 @@ function landingPage(): string {
       <section class="pricing" aria-labelledby="pricing-title">
         <div>
           <p class="eyebrow">One-time license</p>
-          <h2 id="pricing-title">Keep every payment schedule</h2>
+          <h2 id="pricing-title">Keep multiple payment schedules</h2>
           <p>The free version keeps one current schedule. Pay $24 once to save and reopen multiple schedules in this browser.</p>
         </div>
         <div class="price-block">
           <p class="price"><span>$</span>24</p>
           <a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">(opens Sociobot checkout)</span></a>
-          <p><a href="/terms" data-route>Read payment and refund terms</a></p>
+          <p><a href="/terms" data-route>Read refund policy and terms</a></p>
         </div>
       </section>
     </main>`);
@@ -258,7 +258,7 @@ function scheduleForm(): string {
         </section>
 
         <section class="schedule-output" aria-labelledby="output-title">
-          <div><p class="eyebrow">Ready for the next tool</p><h2 id="output-title">Export without retyping</h2><p id="summary-line">${summaryLine(s)}</p></div>
+          <div><p class="eyebrow">Export options</p><h2 id="output-title">Export without retyping</h2><p id="summary-line">${summaryLine(s)}</p></div>
           <div class="export-actions">
             <button class="button button-primary" type="submit">${demoMode ? 'Check demo schedule' : 'Save schedule'}</button>
             <button class="button button-secondary" type="button" id="download-calendar">Download calendar</button>
@@ -289,7 +289,7 @@ function licensePanel(): string {
     <section class="license-panel" aria-labelledby="license-title"><div><p class="eyebrow">Full library active</p><h2 id="license-title">Your license is on this device</h2><p>You can save and reopen multiple schedules in this browser.</p></div><button class="button button-quiet" id="remove-license" type="button">Remove license</button></section>`;
   return `
     <section class="license-panel" aria-labelledby="license-title">
-      <div><p class="eyebrow">One current schedule is free</p><h2 id="license-title">Keep every schedule for $24 once</h2><p>The license adds a library for multiple schedules in this browser. Core calendar, instructions, reminders, and backups stay free.</p></div>
+      <div><p class="eyebrow">One current schedule is free</p><h2 id="license-title">Save multiple schedules for $24 once</h2><p>The license adds a library for multiple schedules in this browser. Calendar, instructions, reminder review, and JSON backups stay free.</p></div>
       <div class="license-actions"><a class="button button-primary" href="${checkoutUrl()}">Buy the full library <span class="sr-only">(opens Sociobot checkout)</span></a><button class="button button-secondary" id="show-license" type="button">Paste a license</button></div>
       ${licenseNotice ? `<p class="license-notice" role="status">${escapeHtml(licenseNotice)}</p>` : ''}
       <form id="license-form" class="license-form" hidden><div class="field"><label for="license-token">License token</label><input id="license-token" autocomplete="off" spellcheck="false" /></div><button class="button button-primary" type="submit">Verify license</button><p id="license-message" role="status"></p></form>
@@ -313,20 +313,21 @@ function legalPage(kind: 'privacy' | 'terms'): string {
   const privacy = kind === 'privacy';
   return shell(`<main id="main" class="legal-page">
     <p class="eyebrow">Deposit Deadline Bridge</p>
-    <h1 tabindex="-1">${privacy ? 'Your schedules stay with you' : 'Terms for using the bridge'}</h1>
+    <h1 tabindex="-1">${privacy ? 'How your schedules are stored' : 'Terms for Deposit Deadline Bridge'}</h1>
     <p class="legal-lede">${privacy ? 'This page explains what is stored and when a network request happens.' : 'These terms keep a small local utility clear and fair.'}</p>
     ${privacy ? `
       <section><h2>Schedule data</h2><p>Real schedules are stored in this browser. Demo changes stay in memory and disappear when you leave or reset the demo.</p><p>The app does not send quote, client, payment, or date details to a server. JSON backup files are created only when you request them.</p></section>
-      <section><h2>License data</h2><p>If you buy or restore a license, the license token and its latest verdict are stored in localStorage. The app sends only that token to the Sociobot license service.</p><p>Sociobot and Dodo process checkout details under their own policies.</p></section>
+      <section><h2>License data</h2><p>If you buy or restore a license, this browser stores the license token and its latest verification result. The app sends only that token to the Sociobot license service.</p></section>
       <section><h2>Network and deletion</h2><p>App files load from this site and are cached for offline use. There are no analytics, advertising scripts, or third-party fonts.</p><p>Clear this site’s browser data to remove schedules and the license token. You can also remove the license inside the workspace.</p></section>` : `
       <section><h2>Use of the tool</h2><p>You remain responsible for checking every amount, date, time zone, reminder, and payment instruction before sharing it.</p><p>The app does not provide accounting, tax, legal, late-fee, or debt-collection advice.</p></section>
-      <section><h2>One-time license</h2><p>The $24 license unlocks the full schedule library for this product. Sociobot and Dodo are the merchant of record and handle payment and refunds.</p><p>A refund or revoked license removes access to paid library features. Your free schedule and data exports remain available.</p></section>
+      <section><h2>One-time license</h2><p>The $24 license adds a library for multiple schedules in this browser. Calendar exports, payment instructions, reminder review, and JSON backups stay free.</p><p>When a license check reports an inactive license, the paid library closes. One free schedule and exports remain available.</p></section>
+      <section><h2>Refund policy</h2><p>You can ask for a refund within 14 days of purchase.</p><p><a href="mailto:support@sociobot.in?subject=Deposit%20Deadline%20Bridge%20refund%20request">Request a refund by email</a>. Include the email address used at checkout and your receipt.</p></section>
       <section><h2>Availability</h2><p>The software is provided as-is under the MIT License. Keep JSON backups of records you cannot afford to lose.</p><p>These terms apply from August 28, 2026.</p></section>`}
   </main>`);
 }
 
 function notFoundPage(): string {
-  return shell(`<main id="main" class="not-found"><div class="broken-bridge" aria-hidden="true"><span></span><i></i><span></span></div><p class="eyebrow">404</p><h1 tabindex="-1">This bridge ends here</h1><p>The page does not exist. Your saved schedules have not changed.</p><a class="button button-primary" href="/" data-route>Return home</a></main>`);
+  return shell(`<main id="main" class="not-found"><div class="broken-bridge" aria-hidden="true"><span></span><i></i><span></span></div><p class="eyebrow">404</p><h1 tabindex="-1">Page not found</h1><p>The page does not exist. Your saved schedules have not changed.</p><a class="button button-primary" href="/" data-route>Return home</a></main>`);
 }
 
 function readForm(): Schedule {
