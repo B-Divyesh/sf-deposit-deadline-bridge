@@ -1,9 +1,9 @@
 # Polish 5 — cumulative zero-finding repair
 
-Reviewed candidate: `28e496608f3d30c498de5c1b3f81399b5cb7313d`  
-Review: `a8d3f440c4273e99317098daac958b0c6bbbe26c`  
-Repair commit: `af0ac3740244676ca90243538abd273068393768`  
-Deployment: `80332660-24b7-4e5e-9a47-bde5c844ad3f`  
+Reviewed candidate: `28e496608f3d30c498de5c1b3f81399b5cb7313d`
+Review: `a8d3f440c4273e99317098daac958b0c6bbbe26c`
+Repair commit: `af0ac3740244676ca90243538abd273068393768`
+Deployment: `80332660-24b7-4e5e-9a47-bde5c844ad3f`
 Live site: <https://deposit-deadline-bridge.sociobot.in>
 
 ## Evidence key
