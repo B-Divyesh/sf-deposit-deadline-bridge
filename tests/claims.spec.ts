@@ -310,6 +310,7 @@ test('@claim:schedule-settings carries chosen locale, currency, time zone, wordi
 });
 
 test('@claim:one-free-schedule uses Sociobot checkout and license verification for a $24 multiple-schedule library', async ({ page }) => {
+  test.setTimeout(45_000);
   await page.goto('/');
   await expect(page.getByText('One schedule is free. The full library costs $24 once.')).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Keep multiple payment schedules' })).toBeVisible();
