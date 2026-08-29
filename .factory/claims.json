@@ -88,7 +88,7 @@
     "claim": "Downloads a backup file and restores a schedule from one.",
     "where": "workspace actions, README",
     "test": "npm test -- --grep @claim:json-backup",
-    "sandbox": "fresh /demo sample; export the JSON, change its project name, import it, and assert the changed data appears"
+    "sandbox": "fresh /demo sample; download the backup, change its project name, restore it, and assert the changed data appears"
   },
   {
     "id": "schedule-settings",
@@ -109,7 +109,7 @@
     "claim": "Calendar exports, payment instructions, reminder review, and backup files stay free.",
     "where": "workspace license panel, Terms",
     "test": "npm test -- --grep @claim:free-core-features",
-    "sandbox": "fresh unlicensed real workspace; fill a valid schedule and assert calendar/instruction downloads, clipboard copy, reminder review, and JSON backup all work"
+    "sandbox": "fresh unlicensed real workspace; fill a valid schedule and assert calendar/instruction downloads, clipboard copy, reminder review, and backup download all work"
   },
   {
     "id": "license-local-storage",

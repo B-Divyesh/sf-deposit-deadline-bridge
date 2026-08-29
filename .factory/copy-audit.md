@@ -110,7 +110,7 @@ No audited sentence exceeds 22 words. No banned marketing word occurs.
 
 | Copy | Words | Result |
 | --- | ---: | --- |
-| Preserve deposit and final balance dates when a quote becomes an invoice. | 12 | Pass; verb-first and 73 characters |
+| Keep deposit and final balance dates when a quote becomes an invoice. | 12 | Pass; verb-first and 69 characters |
 
 ## Terminology table
 
