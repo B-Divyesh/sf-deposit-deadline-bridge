@@ -265,6 +265,7 @@ test('@claim:json-backup downloads and restores a schedule backup', async ({ pag
   await page.locator('#projectName').fill('Backup timing dinner');
   expect(downloadNames).toEqual([]);
   await page.getByRole('link', { name: 'Start for real' }).click();
+  await page.getByRole('button', { name: 'Save schedule' }).waitFor();
   await page.locator('#quoteNumber').fill('BACKUP-17');
   await page.locator('#projectName').fill('Backup timing dinner');
   await page.locator('#clientName').fill('Nadia Rao');
@@ -313,6 +314,7 @@ test('@claim:404-storage-safety leaves schedules and license state byte-for-byte
   try {
     await page.goto('/demo');
     await page.getByRole('link', { name: 'Start for real' }).click();
+    await page.getByRole('button', { name: 'Save schedule' }).waitFor();
     await expect(page).toHaveURL(/\/workspace$/);
     await page.locator('#quoteNumber').fill('SAFE-404');
     await page.locator('#projectName').fill('Winter gallery opening');
