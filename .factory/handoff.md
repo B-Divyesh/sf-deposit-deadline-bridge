@@ -1,33 +1,27 @@
-# Deposit Deadline Bridge — polish 2 handoff
+# Deposit Deadline Bridge — review 3 handoff
 
 ## Result
 
-All cumulative findings in `review-1.md` and `review-2.md` are repaired in `944c63955666ca6c90ccaa05d75e11c93dcb81fe`. The product retains its glacial-ceramic visual system and PWA/local-first deployment class. The first-screen demo action is now the isolated `?demo=1` path, with the sticky banner, Reset demo, and Start for real controls. This handoff and the finding map are committed separately after the repair.
+Adversarial review 3 is complete. Verdict: **FAIL** with 10 findings: 2 blocking, 3 major, and 5 minor. Product code was not changed.
 
-## How to run and verify
+The blocking findings are reopened F-1-5 (absolute “every schedule” paid-tier headings) and F-1-8 (untested payment/refund/provider claims moved to the legal pages). The remaining findings cover unlisted free-feature, license-storage, and deletion claims plus five non-literal labels/headings.
 
-```bash
-npm ci
-npm run dev
-# open http://localhost:5173/?demo=1
-npm run test:unit
-npm test
-npm run build
-```
+## Verification performed
 
-`dist/` is the static deployment output. All claim definitions and their exact runnable commands are in `.factory/claims.json`.
+- Cold live Chromium at 390 × 844 and 1440 × 900.
+- One-click demo population, sticky banner, Reset demo, Start for real, real-storage isolation, same-origin request log, and offline reload.
+- All live routes, route metadata, shared shell, Back/focus behavior, discovered links, checkout redirect, and designed HTTP 404.
+- Live factory URL verifier and axe scans on landing, demo, Privacy, Terms, and 404.
+- Clean clone at `/tmp/ddb-review3-clone-2Hd581` with `npm ci`.
+- Every one of the 15 exact `.factory/claims.json` commands run separately: all passed.
+- `npm test` (30 passed), `npm run test:unit` (3 passed), `npm run build`, `npm audit --audit-level=moderate`, and `npm run test:live`: all passed.
+- Live JS/CSS hashes matched the clean-clone build.
 
-## Evidence
+## Artifacts
 
-- Fresh clone `/tmp/deadline-clean-QsNdmA`: `npm ci`, every one of the 15 declared claim commands passed individually; Playwright's final result was `{"status":"passed","failedTests":[]}`.
-- Fresh clone: `npm run test:unit` passed (3 tests); `npm test` passed (30 Playwright tests, including routes, mobile, offline, privacy, keyboard, and axe checks); `npm run build` passed; `npm audit --audit-level=moderate` found 0 vulnerabilities.
-- Production output: app JavaScript is 12.30 kB gzip and CSS is 4.90 kB gzip.
-- Local `verify-url.sh` evidence is at `.factory/evidence/polish-2/query-demo/`: direct `?demo=1` has the Demo title, `lang=en`, one h1/main, no missing alts or unlabeled buttons, and no console errors.
-- The browser suite uses the pinned `@axe-core/playwright` integration on the landing, demo, legal, and missing-route pages with no serious/critical violations. The standalone axe CLI was incompatible with the supplied browser/ChromeDriver pair; see `polish-2.md`.
-- Deployment: `/opt/fleet/lib/deploy-static.sh deposit-deadline-bridge dist` completed Azure Static Web Apps deployment `eeead0eb-54d7-44b3-9bb7-a20cb62fb281`.
-- Cold live verification: `npm run test:live` passed after deploy. `https://deposit-deadline-bridge.sociobot.in/?demo=1` loaded HT-084 with the Demo title, sticky banner at the export controls, and a working Reset demo. `/`, `/privacy`, `/terms`, and an unknown route had the expected title, one h1/main, common header/footer, and the unknown route returned HTTP 404. Live URL-verifier screenshots/report are in `.factory/evidence/polish-2/live-query-demo/`.
-- Final deployment: `/opt/fleet/lib/deploy-static.sh deposit-deadline-bridge dist` completed Azure Static Web Apps deployment `be477701-a44d-4f57-87e1-318359495f6e`. `npm run test:live` passed. A cold 390 px browser rechecked the direct demo, sticky banner/reset, first-screen catering and final balance wording, legal routes, and shared HTTP 404 shell. Final live screenshots and URL report are in `.factory/evidence/polish-2/live-query-demo-round2/`.
+- Full findings, copy audit, evidence, earlier-finding matrix, and verdict: `.factory/review-3.md`.
+- No product source, tests, configuration, or dependencies were modified.
 
-## Known gaps
+## Work remaining
 
-None.
+Address every finding in `.factory/review-3.md`, then rerun the full review from a fresh browser context and clean clone. The review cannot pass while any finding or unlisted claim remains.
