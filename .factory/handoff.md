@@ -1,43 +1,23 @@
-# Deposit Deadline Bridge — Polish 5 handoff
+# Deposit Deadline Bridge — verification 4 handoff
 
-## Result
+## Result: **PASS**
 
-Round 5 closes every finding in reviews 1–5. The product repair is commit `af0ac3740244676ca90243538abd273068393768`; it is deployed at <https://deposit-deadline-bridge.sociobot.in> as Static Web App deployment `80332660-24b7-4e5e-9a47-bde5c844ad3f`.
+Independent verification passed candidate `acb5682724c9429fce8e5e13948aee23f3cf412e` at <https://deposit-deadline-bridge.sociobot.in> on 2026-08-29 UTC. The live HTML, hashed JS/CSS, service worker, and manifest match the candidate build byte-for-byte.
 
-The repair makes checkout-return tokens unverified until the Sociobot endpoint confirms them. An offline or invalid token cannot unlock the paid library. A previously verified cached license still supports offline use. It also gives the two legal actions 44 px targets and replaces format-first calendar/backup wording with plain task language.
+The app clearly offers a one-click HT-084 sample; records deposit/final deadlines with precise time-zone handling; exports two calendar events and two payment instructions; keeps schedules local; requires review before opening reminder email; and reloads the sample offline.
 
-## How to run and verify
+## Verification performed
 
-```bash
-npm ci
-npm run test:unit
-npm test
-npm run build
-npm audit --audit-level=moderate
-npm run test:live
-```
+- Clean `npm ci`; all 20 exact `.factory/claims.json` commands passed separately.
+- `npm run test:unit` (3/3), `npm test` (36/36), `npm run build`, `npm audit --audit-level=moderate`, and `npm run test:live` all passed.
+- Live desktop/mobile, keyboard, focus, reduced-motion, axe, request-log, headers, cache, PWA/offline, 404, internal-link, checkout, and invalid-license checks passed.
+- The license API enforced an observed 30-request burst allowance: 30 HTTP 200 then 10 HTTP 429; each throttled response included `Retry-After`.
+- Initial production payload is 12,313 B gzip JS and 4,932 B gzip CSS; the mobile AVIF is 11,462 B.
 
-`npm test` runs 36 Playwright tests. The 20 exact commands in `.factory/claims.json` were also run one by one from fresh clone `/tmp/ddb-polish5-clean-jW6KrQ/repo`, followed by the full commands above. All passed; the unit suite is 3/3 and the browser suite is 36/36.
+`/opt/fleet/lib/verify-url.sh` passed (680 ms, zero console errors). The standalone Lighthouse CLI could not run because the launched Chromium tab crashed in this container; direct browser checks and budget measurements passed.
 
-The expanded `@claim:one-free-schedule` test uses isolated browser contexts to prove all four entitlement paths: a valid pasted token, invalid online return token, unverified offline return token, and verified return token. It proves one-record storage while locked and three-record storage only after valid verification.
+Full durable evidence and exact findings are in `.factory/verification-4.md`.
 
-## Release evidence
+## Known gaps / next steps
 
-- `npm run build` produced `dist/`; initial assets are 12.37 KB gzip JavaScript and 4.91 KB gzip CSS.
-- `npm audit --audit-level=moderate` reported zero vulnerabilities.
-- `/opt/fleet/lib/verify-url.sh` passed with zero console errors for `/`, `/?demo=1`, `/privacy`, and `/terms`. Live reports and screenshots are in ignored local path `.factory/evidence/polish-5/`.
-- Cold live browser checks passed the 390 px first screen, every visible action target, one-click HT-084 sample, sticky reset banner, 404, metadata/link crawl, and the offline fake-token lockout.
-- Playwright axe reported zero live violations on `/`, `/?demo=1`, `/privacy`, `/terms`, and `/polish-five-missing`.
-- Lighthouse on live `/`: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.05 s, CLS 0, TBT 0.
-
-The standalone `@axe-core/cli` launcher could not locate a Chrome binary in this container. The permitted Playwright axe integration was used instead and passed on every live route.
-
-## Product notes
-
-- Demo URL: `https://deposit-deadline-bridge.sociobot.in/?demo=1` (also `/demo`). It uses only in-memory sample data and has Reset demo / Start for real controls.
-- Real schedules are local to the browser. Calendar, instructions, reminder review, and backup files stay free.
-- PWA output remains a static offline product with the glacial-ceramic visual system intact.
-
-## Known gaps and next steps
-
-None. No review finding remains open.
+No product defects found. The repository has no lint script. No code changes were made during verification.
