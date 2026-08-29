@@ -25,7 +25,7 @@ describe('daylight-saving deadline resolution', () => {
 });
 
 describe('static release configuration', () => {
-  it('serves unknown paths as a real 404 and does not mark stable assets immutable', async () => {
+  it('serves unknown paths as a real 404, caches only hashed build assets forever, and revalidates HTML and the worker', async () => {
     const config = JSON.parse(await readFile(resolve(process.cwd(), 'public/staticwebapp.config.json'), 'utf8')) as {
       responseOverrides: Record<string, { rewrite: string; statusCode: number }>;
       mimeTypes: Record<string, string>;
@@ -33,6 +33,10 @@ describe('static release configuration', () => {
     };
     expect(config.responseOverrides['404']).toEqual({ rewrite: '/404.html', statusCode: 404 });
     expect(config.mimeTypes['.avif']).toBe('image/avif');
+    expect(config.routes.find((route) => route.route === '/build/*')?.headers?.['Cache-Control']).toBe('public, max-age=31536000, immutable');
     expect(config.routes.find((route) => route.route === '/assets/*')?.headers?.['Cache-Control']).not.toContain('immutable');
+    for (const route of ['/', '/demo', '/workspace', '/privacy', '/terms', '/index.html', '/offline.html', '/404.html', '/sw.js']) {
+      expect(config.routes.find((entry) => entry.route === route)?.headers?.['Cache-Control']).toBe('no-cache');
+    }
   });
 });

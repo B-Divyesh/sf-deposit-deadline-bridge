@@ -10,8 +10,21 @@ async function siteResponse(path) {
 const home = await siteResponse('/');
 assert.equal(home.status, 200, 'home must return HTTP 200');
 assert.match(home.headers.get('content-security-policy') ?? '', /style-src 'self'/, 'home must keep its self-only stylesheet policy');
+assert.equal(home.headers.get('cache-control'), 'no-cache', 'HTML must revalidate so it can reference a new worker and build');
 const homeHtml = await home.text();
 assert.match(homeHtml, /<title>Deposit Deadline Bridge — preserve payment dates<\/title>/, 'home must identify the product');
+
+const buildAssets = [...homeHtml.matchAll(/(?:src|href)="(\/build\/(?:app|index)-[A-Za-z0-9_-]+\.(?:js|css))"/g)].map((match) => match[1]);
+assert.equal(buildAssets.length, 2, 'home must load one hashed application script and stylesheet');
+for (const asset of buildAssets) {
+  const response = await siteResponse(asset);
+  assert.equal(response.status, 200, `${asset} must be served`);
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=31536000, immutable', `${asset} must be immutable for one year`);
+}
+
+const worker = await siteResponse('/sw.js');
+assert.equal(worker.status, 200, 'service worker must be served');
+assert.equal(worker.headers.get('cache-control'), 'no-cache', 'service worker must revalidate for application updates');
 
 const notFound = await siteResponse('/regression-missing-page');
 assert.equal(notFound.status, 404, 'unknown routes must return HTTP 404');

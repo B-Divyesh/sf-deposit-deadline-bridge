@@ -28,7 +28,7 @@ test('@claim:offline-reload works offline after the first visit', async ({ page,
   await expect.poll(() => page.evaluate(async () => {
     const keys = await caches.keys();
     const entries = await Promise.all(keys.map(async (key) => (await caches.open(key)).keys()));
-    return entries.flat().some((request) => /\/assets\/app-[\w-]+\.js$/.test(new URL(request.url).pathname));
+    return entries.flat().some((request) => /\/build\/app-[\w-]+\.js$/.test(new URL(request.url).pathname));
   })).toBe(true);
   await page.reload();
   await expect(page.locator('#projectName')).toHaveValue('Highland Glasshouse Supper');

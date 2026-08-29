@@ -8,12 +8,15 @@ export default defineConfig({
     target: 'es2022',
     sourcemap: true,
     manifest: true,
+    // Only Vite outputs live here. Every file in this directory gets a
+    // content hash, so Static Web Apps can safely cache it indefinitely.
+    assetsDir: 'build',
     assetsInlineLimit: 2048,
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/app-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash][extname]',
+        entryFileNames: 'build/app-[hash].js',
+        chunkFileNames: 'build/[name]-[hash].js',
+        assetFileNames: 'build/[name]-[hash][extname]',
       },
     },
   },
