@@ -9,7 +9,9 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "playwright test",
     "test:unit": "vitest run --config vitest.config.ts",
-    "test:live": "node scripts/verify-live.mjs"
+    "test:live": "node scripts/verify-live.mjs",
+    "audit:copy": "node scripts/generate-copy-audit.mjs",
+    "test:copy-audit": "playwright test tests/copy-audit.spec.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.2",
